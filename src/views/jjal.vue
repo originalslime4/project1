@@ -72,11 +72,11 @@ export default {
       formData.append("title", this.title);
       formData.append("name", this.name);
 
-      await axios.post("http://localhost:3000/upload", formData);
+      await axios.post("/upload", formData);
       this.getFiles();
     },
     async getFiles() {
-      const res = await axios.get("http://localhost:3000/files");
+      const res = await axios.get("/files");
       this.files = res.data;
     },
   },
@@ -174,3 +174,6 @@ export default {
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
 }
 </style>
+// git add .
+// git commit -m "설명: 예) 이미지 업로드 UI 개선"
+// git push origin main
