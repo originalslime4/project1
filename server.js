@@ -8,7 +8,8 @@ import { fileURLToPath } from "url";
 import { google } from "googleapis";
 import dotenv from "dotenv";
 dotenv.config();
-
+console.log("CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
+console.log("REDIRECT_URI:", process.env.GOOGLE_REDIRECT_URI);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -25,9 +26,9 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
   cookie: {
-    secure: true, // HTTPS일 경우 true
-    sameSite: ""
-  }
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax"
+}
 }));
 
 const DATA_FILE = path.join(__dirname, "fileList.json");
@@ -48,7 +49,6 @@ app.get("/login", (req, res) => {
 const authUrl = oauth2Client.generateAuthUrl({
   access_type: "offline",
   scope: ["https://www.googleapis.com/auth/drive.file"],
-  redirect_uri: process.env.GOOGLE_REDIRECT_URI
 });
   res.redirect(authUrl);
 });
