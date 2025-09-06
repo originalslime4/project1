@@ -76,13 +76,13 @@ app.get("/oauth2callback", async (req, res) => {
 // 업로드 API → 사용자 Drive에 저장
 app.post("/upload", upload.single("file"), async (req, res) => {
   if (!req.session.tokens) return res.status(401).json({ error: "로그인 필요" });
-
+  console.log("1")
   oauth2Client.setCredentials(req.session.tokens);
   const drive = google.drive({ version: "v3", auth: oauth2Client });
 
   const { title, name } = req.body;
   const filePath = req.file.path;
-
+console.log(drive)
   try {
     const fileMetadata = { name: req.file.originalname };
     const media = {

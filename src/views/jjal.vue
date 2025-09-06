@@ -16,8 +16,8 @@
     <h1>d</h1>
   </div>
   <div v-if="!loggedIn" style="margin: 20px">
-  <button @click="loginWithGoogle">Google 로그인</button>
-</div>
+    <button @click="loginWithGoogle">Google 로그인</button>
+  </div>
 
   <div>
     <input type="file" @change="onFileChange" accept="image/*,video/gif" />
@@ -27,7 +27,12 @@
 
     <div class="image-grid">
       <div v-for="item in files" :key="item.id">
-        <img :src="item.url" />
+        <img
+          :src="item.url"
+          @error="handleImageError($event)"
+          alt="슬라임 이미지"
+        />
+
         <p>{{ item.title }} - {{ item.name }}</p>
         <small>{{ item.createdAt }}</small>
       </div>
@@ -69,6 +74,10 @@ export default {
     };
   },
   methods: {
+    handleImageError(e) {
+    e.target.src = require("../assets/non.png"); // 또는 절대 경로
+  },
+
     rerod() {
       this.$router.push({ path: "/", query: { place: "/jjal" } });
     },
@@ -88,7 +97,7 @@ export default {
 
       try {
         const res = await axios.post("/upload", formData);
-console.log(res.data); // 또는 다른 용도로 사용
+        console.log(res.data); // 또는 다른 용도로 사용
 
         this.getFiles();
       } catch (err) {
@@ -98,6 +107,7 @@ console.log(res.data); // 또는 다른 용도로 사용
     async getFiles() {
       const res = await axios.get("/files");
       this.files = res.data;
+      console.log(res.data)
     },
     async checkLogin() {
       try {
@@ -110,7 +120,6 @@ console.log(res.data); // 또는 다른 용도로 사용
     loginWithGoogle() {
       window.location.href = "/login";
     },
-
   },
   mounted() {
     this.checkLogin();
