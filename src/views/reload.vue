@@ -4,7 +4,7 @@
 
 <script>
 export default {
-  name: "Reloding",
+  name: "relodPage",
   mounted() {
     var go = this.$route.query.place;
     if (go) {
