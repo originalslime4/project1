@@ -24,12 +24,12 @@
 export default {
   name: "App",
   mounted() {
-    // var go = this.$route.query.place;
-    // if (go) {
-    //   this.$router.push(this.$route.query.place);
-    // } else {
-    //   this.$router.push("/home");
-    // }
+    var go = this.$route.query.place;
+    if (go) {
+      this.$router.push(this.$route.query.place);
+    } else {
+      this.$router.push("/home");
+    }
   },
   setup() {
     return {};
