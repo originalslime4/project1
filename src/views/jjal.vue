@@ -80,7 +80,7 @@ export default {
   },
 
     rerod() {
-      this.$router.push({ path: "/reload", query: { place: "/jjal" } });
+      this.$router.push({ path: "https://project1-n922.onrender.com/reload", query: { place: "/jjal" } });
     },
     onFileChange(e) {
       this.file = e.target.files[0];

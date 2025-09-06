@@ -12,8 +12,6 @@
       <router-link class="lk" style="top: 240px">채팅</router-link>
     </div>
   </div>
-  <h1>d</h1>
-  <h1>골다공증 부실공사로 위에 제목 누르시길 바랍니다ㅋ</h1>
   <div id="app">
     <router-view />
     <!-- <img alt="Vue logo" src="./assets/logo.png">
@@ -44,7 +42,7 @@ export default {
   },
    methods: {
     rerod() {
-      this.$router.push({ path: "/reload", query: { place: "/home" } });
+      this.$router.push({ path: "https://project1-n922.onrender.com/reload", query: { place: "/home" } });
     },
     async checkLogin() {
   try {
