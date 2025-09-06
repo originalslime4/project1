@@ -15,6 +15,10 @@
   <div>
     <h1>d</h1>
   </div>
+  <div v-if="!loggedIn" style="margin: 20px">
+  <button @click="loginWithGoogle">Google 로그인</button>
+</div>
+
   <div>
     <input type="file" @change="onFileChange" accept="image/*,video/gif" />
     <input v-model="title" placeholder="제목" />
@@ -42,6 +46,10 @@
 
 <script>
 import axios from "axios";
+// const api = axios.create({
+//   baseURL: "/",
+//   withCredentials: true
+// });
 
 // import HelloWorld from './components/HelloWorld.vue'
 
@@ -57,6 +65,7 @@ export default {
       title: "",
       name: "",
       files: [],
+      loggedIn: false,
     };
   },
   methods: {
@@ -67,20 +76,44 @@ export default {
       this.file = e.target.files[0];
     },
     async uploadFile() {
+      if (!this.loggedIn) {
+        alert("로그인 후 업로드 가능합니다.");
+        return;
+      }
+
       const formData = new FormData();
       formData.append("file", this.file);
       formData.append("title", this.title);
       formData.append("name", this.name);
 
-      await axios.post("/upload", formData);
-      this.getFiles();
+      try {
+        const res = await axios.post("/upload", formData);
+console.log(res.data); // 또는 다른 용도로 사용
+
+        this.getFiles();
+      } catch (err) {
+        alert("업로드 실패: " + err.response?.data?.error || err.message);
+      }
     },
     async getFiles() {
       const res = await axios.get("/files");
       this.files = res.data;
     },
+    async checkLogin() {
+      try {
+        await axios.get("/auth/check");
+        this.loggedIn = true;
+      } catch {
+        this.loggedIn = false;
+      }
+    },
+    loginWithGoogle() {
+      window.location.href = "/login";
+    },
+
   },
   mounted() {
+    this.checkLogin();
     this.getFiles();
   },
   components: {
@@ -175,5 +208,5 @@ export default {
 }
 </style>
 // git add .
-// git commit -m "설명: 예) 이미지 업로드 UI 개선"
+// git commit -m "포트버그 수정"
 // git push origin main
