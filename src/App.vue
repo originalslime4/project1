@@ -24,12 +24,12 @@
 export default {
   name: "App",
   mounted() {
-    var go = this.$route.query.place;
-    if (go) {
-      this.$router.push(this.$route.query.place);
-    } else {
-      this.$router.push("/home");
-    }
+    // var go = this.$route.query.place;
+    // if (go) {
+    //   this.$router.push(this.$route.query.place);
+    // } else {
+    //   this.$router.push("/home");
+    // }
   },
   setup() {
     return {};
@@ -38,6 +38,24 @@ export default {
     return {
       menu: false,
     };
+  },
+   methods: {
+    async checkLogin() {
+  try {
+    const res = await axios.get("https://project1-n922.onrender.com/auth/check", {
+      withCredentials: true
+    });
+
+    if (res.data.loggedIn) {
+      this.loggedIn = true;
+    } else {
+      this.loggedIn = false;
+    }
+  } catch (err) {
+    console.error("로그인 확인 실패:", err);
+    this.loggedIn = false;
+  }
+},
   },
   components: {
     // HelloWorld
