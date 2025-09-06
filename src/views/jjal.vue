@@ -51,6 +51,7 @@
 
 <script>
 import axios from "axios";
+axios.defaults.withCredentials = true;
 // const api = axios.create({
 //   baseURL: "/",
 //   withCredentials: true
@@ -118,8 +119,8 @@ export default {
       }
     },
     loginWithGoogle() {
-      window.location.href = "/login";
-    },
+  window.location.href = "https://project1-n922.onrender.com/login";
+}
   },
   mounted() {
     this.checkLogin();
@@ -216,6 +217,6 @@ export default {
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
 }
 </style>
-git add .
-git commit -m "버그"
-git push origin main
+// git add .
+// git commit -m "버그"
+// git push origin main
