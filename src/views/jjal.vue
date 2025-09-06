@@ -208,5 +208,5 @@ console.log(res.data); // 또는 다른 용도로 사용
 }
 </style>
 // git add .
-// git commit -m "포트버그 수정"
+// git commit -m "버그"
 // git push origin main
