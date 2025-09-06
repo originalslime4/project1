@@ -216,6 +216,6 @@ export default {
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
 }
 </style>
-// git add .
-// git commit -m "버그"
-// git push origin main
+git add .
+git commit -m "버그"
+git push origin main
