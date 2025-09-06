@@ -33,17 +33,12 @@ let fileList = fs.existsSync(DATA_FILE) ? JSON.parse(fs.readFileSync(DATA_FILE))
 
 const upload = multer({ dest: "temp/" }); // 임시 저장 폴더
 
-// OAuth2 클라이언트 설정
-const credentials = JSON.parse(
-  fs.readFileSync(path.join(__dirname, "client_secret_801797477748-f6rm9b4hs3cj5a58upb5guh9h5fveltl.apps.googleusercontent.com.json"))
+const oauth2Client = new google.auth.OAuth2(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET,
+  process.env.GOOGLE_REDIRECT_URI
 );
 
-const { client_id, client_secret, redirect_uris } = credentials.web;
-const oauth2Client = new google.auth.OAuth2(
-  "801797477748-f6rm9b4hs3cj5a58upb5guh9h5fveltl.apps.googleusercontent.com",
-  "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",
-  "https://project1-n922.onrender.com/oauth2callback"
-);
 
 
 // 로그인 URL 생성
