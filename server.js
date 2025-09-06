@@ -15,7 +15,7 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(cors({
-  origin: "http://localhost:3000", // 또는 Render 배포 주소
+  origin: "https://project1-n922.onrender.com", // 또는 Render 배포 주소
   credentials: true
 }));
 
@@ -26,7 +26,7 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
   cookie: {
-  secure: process.env.NODE_ENV === "production",
+  secure: true,
   sameSite: "lax"
 }
 }));
