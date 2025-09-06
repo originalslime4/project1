@@ -23,8 +23,8 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
   cookie: {
-    secure: false, // HTTPS일 경우 true
-    sameSite: "lax"
+    secure: true, // HTTPS일 경우 true
+    sameSite: ""
   }
 }));
 
@@ -41,10 +41,11 @@ const credentials = JSON.parse(
 const { client_id, client_secret, redirect_uris } = credentials.web;
 
 const oauth2Client = new google.auth.OAuth2(
-  client_id,
-  client_secret,
-  redirect_uris[0] // 예: https://slime-uploader.onrender.com/oauth2callback
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET,
+  process.env.GOOGLE_REDIRECT_URI
 );
+
 
 
 // 로그인 URL 생성
