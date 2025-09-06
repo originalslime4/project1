@@ -41,7 +41,7 @@ const oauth2Client = new google.auth.OAuth2(
 
 
 
-// 로그인 URL 생성
+
 app.get("/login", (req, res) => {
   const authUrl = oauth2Client.generateAuthUrl({
     access_type: "offline",
