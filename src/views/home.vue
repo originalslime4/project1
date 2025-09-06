@@ -39,7 +39,7 @@ export default {
   },
   methods: {
     rerod() {
-    this.$router.push({ path: '/reload', query: {place:"/home"} });
+    this.$router.push({ path: 'https://project1-n922.onrender.com/reload', query: {place:"/home"} });
     },
   },
   components: {
