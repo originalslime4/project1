@@ -2,7 +2,7 @@
   <div class="home">
     <a @click="rerod">카르마 슬라임</a>
     <b>알림</b>
-    <c @click="menu = !menu">三{{ menu }}</c>
+    <span @click="menu = !menu">三{{ menu }}</span>
     <img src="./assets/propil.jpg" class="propil" />
     <div class="menu" v-if="menu">
       <router-link class="lk" style="top: 0px" to="/home">홈</router-link>
@@ -42,7 +42,7 @@ export default {
   },
    methods: {
     rerod() {
-      this.$router.push({ path: "https://project1-n922.onrender.com/reload", query: { place: "/home" } });
+      this.$router.push({ path: "/reload", query: { place: "/home" } });
     },
     async checkLogin() {
   try {
@@ -94,7 +94,7 @@ export default {
   border-radius: 10px;
   padding: 5px;
 }
-.home c {
+.home span {
   color: black;
   font-size: 37.5px;
   position: absolute;

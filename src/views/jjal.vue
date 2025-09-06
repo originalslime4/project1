@@ -2,7 +2,7 @@
   <div class="home">
     <a @click="rerod">{{ Math.random() < 0.5 ? "이런짤" : "저런짤" }} 슬라임</a>
     <b>알림</b>
-    <c @click="menu = !menu">三{{ menu }}</c>
+    <span @click="menu = !menu">三{{ menu }}</span>
     <img src="../assets/propil.jpg" class="propil" />
     <div class="menu" v-if="menu">
       <router-link class="lk" style="top: 0px" to="/home">홈</router-link>
@@ -28,7 +28,7 @@
     <div class="image-grid">
       <div v-for="item in files" :key="item.id">
         <img
-          :src="item.url"
+          :src="convertDriveLinkToThumbnail(item.url)"
           
           alt="슬라임 이미지"
         /><!-- @error="handleImageError($event)" -->
@@ -58,7 +58,6 @@ axios.defaults.withCredentials = true;
 // });
 
 // import HelloWorld from './components/HelloWorld.vue'
-
 export default {
   name: "jallPage",
   setup() {
@@ -75,12 +74,20 @@ export default {
     };
   },
   methods: {
+    convertDriveLinkToThumbnail(originalUrl, size = 1000) {
+      console.log("777")
+  const match = originalUrl.match(/(?:id=|\/d\/)([a-zA-Z0-9_-]{25,})/);
+  if (!match) return null;
+
+  const fileId = match[1];
+  return `https://drive.google.com/thumbnail?id=${fileId}&sz=w${size}`;
+},
     handleImageError(e) {
     e.target.src = require("../assets/non.png"); // 또는 절대 경로
   },
 
     rerod() {
-      this.$router.push({ path: "https://project1-n922.onrender.com/reload", query: { place: "/jjal" } });
+      this.$router.push({ path: "/reload", query: { place: "/jjal" } });
     },
     onFileChange(e) {
       this.file = e.target.files[0];
@@ -130,7 +137,7 @@ export default {
   created() {
     this.checkLogin();
     this.getFiles();
-  },
+   },
   components: {
     // HelloWorld
   },
@@ -169,7 +176,7 @@ export default {
   border-radius: 10px;
   padding: 5px;
 }
-.home c {
+.home span {
   color: black;
   font-size: 37.5px;
   position: absolute;
