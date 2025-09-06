@@ -26,9 +26,9 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
   cookie: {
-  secure: true,
-  sameSite: "lax"
-}
+    secure: true,
+    sameSite: "None"
+  }
 }));
 
 const DATA_FILE = path.join(__dirname, "fileList.json");
