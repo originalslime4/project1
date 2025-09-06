@@ -29,9 +29,9 @@
       <div v-for="item in files" :key="item.id">
         <img
           :src="item.url"
-          @error="handleImageError($event)"
+          
           alt="슬라임 이미지"
-        />
+        /><!-- @error="handleImageError($event)" -->
 
         <p>{{ item.title }} - {{ item.name }}</p>
         <small>{{ item.createdAt }}</small>
@@ -80,7 +80,7 @@ export default {
   },
 
     rerod() {
-      this.$router.push({ path: "/", query: { place: "/jjal" } });
+      this.$router.push({ path: "/reload", query: { place: "/jjal" } });
     },
     onFileChange(e) {
       this.file = e.target.files[0];

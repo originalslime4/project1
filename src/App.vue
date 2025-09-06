@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <a @click="this.$router.go(0)">카르마 슬라임</a>
+    <a @click="rerod">카르마 슬라임</a>
     <b>알림</b>
     <c @click="menu = !menu">三{{ menu }}</c>
     <img src="./assets/propil.jpg" class="propil" />
@@ -12,6 +12,8 @@
       <router-link class="lk" style="top: 240px">채팅</router-link>
     </div>
   </div>
+  <h1>d</h1>
+  <h1>골다공증 부실공사로 위에 제목 누르시길 바랍니다ㅋ</h1>
   <div id="app">
     <router-view />
     <!-- <img alt="Vue logo" src="./assets/logo.png">
@@ -41,17 +43,15 @@ export default {
     };
   },
    methods: {
+    rerod() {
+      this.$router.push({ path: "/reload", query: { place: "/home" } });
+    },
     async checkLogin() {
   try {
     const res = await axios.get("https://project1-n922.onrender.com/auth/check", {
       withCredentials: true
     });
-
-    if (res.data.loggedIn) {
-      this.loggedIn = true;
-    } else {
-      this.loggedIn = false;
-    }
+    this.loggedIn = res.data.loggedIn;
   } catch (err) {
     console.error("로그인 확인 실패:", err);
     this.loggedIn = false;
