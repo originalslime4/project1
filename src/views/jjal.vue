@@ -115,17 +115,13 @@ export default {
     const res = await axios.get("https://project1-n922.onrender.com/auth/check", {
       withCredentials: true
     });
-
-    if (res.data.loggedIn) {
-      this.loggedIn = true;
-    } else {
-      this.loggedIn = false;
-    }
+    this.loggedIn = res.data.loggedIn;
   } catch (err) {
     console.error("로그인 확인 실패:", err);
     this.loggedIn = false;
   }
 },
+
 
     loginWithGoogle() {
   window.location.href = "https://project1-n922.onrender.com/login";
