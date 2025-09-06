@@ -7,29 +7,30 @@ import session from "express-session";
 import { fileURLToPath } from "url";
 import { google } from "googleapis";
 import dotenv from "dotenv";
+import { Console } from "console";
 dotenv.config();
 console.log("CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
 console.log("REDIRECT_URI:", process.env.GOOGLE_REDIRECT_URI);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 const app = express();
-app.use(cors({
-  origin: "https://project1-n922.onrender.com", // 또는 Render 배포 주소
-  credentials: true
-}));
-
-app.use(express.json());
-app.use(express.static(path.join(__dirname, "dist")));
+app.set("trust proxy", 1);
 app.use(session({
   secret: "tmffkdlavmfhwprxm",
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
   cookie: {
     secure: true,
     sameSite: "None"
   }
 }));
+app.use(cors({
+  origin: "https://project1-n922.onrender.com", // 또는 Render 배포 주소
+  credentials: true
+}));
+app.use(express.json());
+app.use(express.static(path.join(__dirname, "dist")));
+
 
 const DATA_FILE = path.join(__dirname, "fileList.json");
 let fileList = fs.existsSync(DATA_FILE) ? JSON.parse(fs.readFileSync(DATA_FILE)) : [];
@@ -67,7 +68,11 @@ app.get("/oauth2callback", async (req, res) => {
   const { tokens } = await oauth2Client.getToken(code);
   oauth2Client.setCredentials(tokens);
   req.session.tokens = tokens;
-  res.redirect("/jjal"); // 로그인 후 메인 페이지로 이동
+  req.session.save(() => {
+    console.log("세션 저장 완료:", req.session.tokens);
+    res.redirect("https://project1-n922.onrender.com/jjal");
+  });
+
 });
 
 // 업로드 API → 사용자 Drive에 저장
