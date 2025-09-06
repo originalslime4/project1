@@ -122,7 +122,7 @@ export default {
   window.location.href = "https://project1-n922.onrender.com/login";
 }
   },
-  mounted() {
+  created() {
     this.checkLogin();
     this.getFiles();
   },

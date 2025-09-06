@@ -67,7 +67,7 @@ app.get("/oauth2callback", async (req, res) => {
   const { tokens } = await oauth2Client.getToken(code);
   oauth2Client.setCredentials(tokens);
   req.session.tokens = tokens;
-  res.redirect("/"); // 로그인 후 메인 페이지로 이동
+  res.redirect("/jjal"); // 로그인 후 메인 페이지로 이동
 });
 
 // 업로드 API → 사용자 Drive에 저장
