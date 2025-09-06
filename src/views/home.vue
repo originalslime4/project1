@@ -39,7 +39,7 @@ export default {
   },
   methods: {
     rerod() {
-    this.$router.push({ path: '/', query: {place:"/home"} });
+    this.$router.push({ path: '/reload', query: {place:"/home"} });
     },
   },
   components: {
