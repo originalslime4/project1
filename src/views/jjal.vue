@@ -183,8 +183,8 @@ export default {
   },
 
   created() {
-    // this.checkLogin();
-    // this.getFiles();
+    this.checkLogin();
+    this.getFiles();
   },
   components: {
     // HelloWorld
