@@ -3,13 +3,26 @@
     <a @click="rerod">{{ Math.random() < 0.5 ? "이런짤" : "저런짤" }} 슬라임</a>
     <b>알림</b>
     <span @click="menu = !menu">三{{ menu }}</span>
-    <img src="../assets/propil.jpg" class="propil" />
+    <img src="../assets/propil.jpg" class="propil" style="height: 37.5px;position: absolute;top: 50%;right:0;transform: translate(-20px, -50%);" />
     <div class="menu" v-if="menu">
-      <router-link class="lk" style="top: 0px" to="/home">홈</router-link>
-      <router-link class="lk" style="top: 60px">개발된 게임</router-link>
-      <router-link class="lk" style="top: 120px">게시판</router-link>
-      <router-link class="lk" style="top: 180px" to="/jjal">짤방</router-link>
-      <router-link class="lk" style="top: 240px">채팅</router-link>
+      <p @click="goto='/home'">홈</p>
+      <p>개발게임</p>
+      <p>게시판</p>
+      <p @click="goto='/jjal'">짤방</p>
+      <p>채팅</p>
+    </div>
+    <div class="menu2" v-if="false">
+      <div style="padding:10px">
+        <img src="../assets/propil.jpg" class="propil" style="width: 37.5%;top:0;left:0;" />
+        <h3>
+          {{profile[2]}}
+        </h3>
+      </div>
+      <p>홈</p>
+      <p>개발게임</p>
+      <p>게시판</p>
+      <p>짤방</p>
+      <p>채팅</p>
     </div>
   </div>
   <div>
@@ -29,15 +42,19 @@
       <div v-for="item in files" :key="item.id">
         <img
           :src="convertDriveLinkToThumbnail(item.url)"
-          
           alt="슬라임 이미지"
-        /><!-- @error="handleImageError($event)" -->
+        ><!-- @error="handleImageError($event)" -->
 
         <p>{{ item.title }} - {{ item.name }}</p>
         <small>{{ item.createdAt }}</small>
       </div>
     </div>
   </div>
+<div class="pagination">
+  <button @click="prevPage" :disabled="serchinfo.currentPage === 1">이전</button>
+  <span>{{ serchinfo.currentPage }} / {{ serchinfo.totalPages }}</span>
+  <button @click="nextPage" :disabled="serchinfo.currentPage === serchinfo.totalPages">다음</button>
+</div>
 
   <!-- <div v-for="i in 1000" :key="i">
     <h1>대충 엄청난 스토리</h1>
@@ -70,21 +87,22 @@ export default {
       title: "",
       name: "",
       files: [],
-      loggedIn: false,
+      goto:"",
+      userinfo:{loggedIn:false,userName:"",userEmail:"",userPicture:""},
+      serchinfo:{searchKeyword: "",currentPage: 1,totalPages: 1}
     };
   },
   methods: {
     convertDriveLinkToThumbnail(originalUrl, size = 1000) {
-      console.log("777")
-  const match = originalUrl.match(/(?:id=|\/d\/)([a-zA-Z0-9_-]{25,})/);
-  if (!match) return null;
+      const match = originalUrl.match(/(?:id=|\/d\/)([a-zA-Z0-9_-]{25,})/);
+      if (!match) return null;
 
-  const fileId = match[1];
-  return `https://drive.google.com/thumbnail?id=${fileId}&sz=w${size}`;
-},
+      const fileId = match[1];
+      return `https://drive.google.com/thumbnail?id=${fileId}&sz=w${size}`;
+    },
     handleImageError(e) {
-    e.target.src = require("../assets/non.png"); // 또는 절대 경로
-  },
+      e.target.src = require("../assets/non.png"); // 또는 절대 경로
+    },
 
     rerod() {
       this.$router.push({ path: "/reload", query: { place: "/jjal" } });
@@ -113,31 +131,61 @@ export default {
       }
     },
     async getFiles() {
-      const res = await axios.get("/files");
-      this.files = res.data;
-      console.log(res.data)
-    },
+  const res = await axios.get("https://project1-n922.onrender.com/files", {
+    params: {
+      page: this.serchinfo.currentPage,
+      q: this.serchinfo.searchKeyword
+    }
+  });
+
+  this.files = res.data.files;
+  this.serchinfo.totalPages = res.data.totalPages;
+},
     async checkLogin() {
   try {
-    const res = await axios.get("https://project1-n922.onrender.com/auth/check", {
-      withCredentials: true
+    const res = await axios.get("/auth/check", {
+      withCredentials: true,
     });
-    this.loggedIn = res.data.loggedIn;
+    this.userinfo.loggedIn=res.data.loggedIn;
+    if (res.data.loggedIn) {
+      this.userinfo.userName = res.data.name;
+      this.userinfo.userEmail = res.data.email;
+      this.userinfo.userPicture = res.data.picture;
+    }
   } catch (err) {
     console.error("로그인 확인 실패:", err);
-    this.loggedIn = false;
+    this.userinfo.loggedIn = false;
+    this.userinfo.userName = "";
+    this.userinfo.userEmail = "";
+    this.userinfo.userPicture = "";
   }
 },
-
-
     loginWithGoogle() {
-  window.location.href = "https://project1-n922.onrender.com/login";
-}
+      window.location.href = "/login";
+    },
+    prevPage() {
+    if (this.serchinfo.currentPage > 1) {
+      this.serchinfo.currentPage--;
+      this.getFiles();
+    }
   },
+  nextPage() {
+    if (this.serchinfo.currentPage < this.serchinfo.totalPages) {
+      this.serchinfo.currentPage++;
+      this.getFiles();
+    }
+  }
+  },
+  watch: {
+    goto(newVal) {
+      this.$router.push(newVal)
+    },
+  },
+
   created() {
-    this.checkLogin();
-    this.getFiles();
-   },
+    // this.checkLogin();
+    // this.getFiles();
+  },
   components: {
     // HelloWorld
   },
@@ -192,26 +240,53 @@ export default {
   width: 200px;
   height: 1000px;
 }
-.lk {
+.menu p{
   background: rgb(0, 175, 0);
   color: black;
-  font-size: 25px;
+  width: 100%;
+  height: 50px;
+  font-size: 250%;
   font-weight: 1000;
-  position: absolute;
-  width: 200px;
   border-color: #000000;
   border-bottom-style: outset;
   border-top-style: inset;
   left: 0px;
+  display: flex;
+  align-items: center;      /* 세로 중앙 */
+  justify-content: center;  /* 가로 중앙 */
+  text-align: center;
+  margin: 0;
+}
+.menu2 {
+  background: rgb(255, 255, 255);
+  border-radius: 10px;
+  border-style: inset;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 200px;
+  height: 500px;
+}
+.menu2 p{
+  background: rgb(255, 255, 255);
+  color: black;
+  width: 100%;
+  height: 50px;
+  font-size: 250%;
+  font-weight: 1000;
+  border-color: #000000;
+  border-bottom-style: outset;
+  border-top-style: inset;
+  left: 0px;
+  display: flex;
+  align-items: center;      /* 세로 중앙 */
+  justify-content: center;  /* 가로 중앙 */
+  text-align: center;
+  margin: 0;
 }
 .propil {
   background: #000000;
   border-radius: 100%;
-  height: 37.5px;
-  position: absolute;
-  top: 50%;
-  right: 0;
-  transform: translate(-20px, -50%);
   padding: 5px;
 }
 .image-grid {

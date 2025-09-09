@@ -7,6 +7,7 @@ import session from "express-session";
 import { fileURLToPath } from "url";
 import { google } from "googleapis";
 import dotenv from "dotenv";
+import { MongoClient } from "mongodb";
 import { Console } from "console";
 dotenv.config();
 console.log("CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
@@ -32,8 +33,6 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "dist")));
 
 
-const DATA_FILE = path.join(__dirname, "fileList.json");
-let fileList = fs.existsSync(DATA_FILE) ? JSON.parse(fs.readFileSync(DATA_FILE)) : [];
 
 const upload = multer({ dest: "temp/" }); // 임시 저장 폴더
 
@@ -54,11 +53,26 @@ const authUrl = oauth2Client.generateAuthUrl({
   res.redirect(authUrl);
 });
 
-app.get("/auth/check", (req, res) => {
-  if (req.session.tokens) {
-    res.json({ loggedIn: true });
-  } else {
-    res.status(401).json({ loggedIn: false });
+app.get("/auth/check", async (req, res) => {
+  if (!req.session.tokens) {
+    return res.status(401).json({ loggedIn: false });
+  }
+
+  oauth2Client.setCredentials(req.session.tokens);
+
+  try {
+    const oauth2 = google.oauth2({ version: "v2", auth: oauth2Client });
+    const userInfo = await oauth2.userinfo.get();
+
+    res.json({
+      loggedIn: true,
+      name: userInfo.data.name,
+      email: userInfo.data.email,
+      picture: userInfo.data.picture
+    });
+  } catch (err) {
+    console.error("사용자 정보 가져오기 실패", err);
+    res.status(500).json({ error: "사용자 정보 가져오기 실패" });
   }
 });
 
@@ -107,16 +121,14 @@ console.log(drive)
 
     const fileUrl = `https://drive.google.com/uc?id=${fileId}`;
     const newFile = {
-      id: Date.now(),
-      title,
-      name,
-      url: fileUrl,
-      createdAt: new Date().toLocaleString()
-    };
+  title,
+  name,
+  url: fileUrl,
+  createdAt: new Date().toLocaleString()
+};
 
-    fileList.push(newFile);
-    fs.writeFileSync(DATA_FILE, JSON.stringify(fileList, null, 2));
-    res.json({ success: true, url: fileUrl });
+await db.collection("files").insertOne(newFile);
+res.json({ success: true, url: fileUrl });
   } catch (err) {
     console.error("Drive 업로드 실패", err);
     res.status(500).json({ error: "업로드 실패" });
@@ -126,9 +138,23 @@ console.log(drive)
 });
 
 // 목록 조회 API
-app.get("/files", (req, res) => {
-  res.json(fileList);
+app.get("/files", async (req, res) => {
+  const keyword = req.query.q || "";
+  const page = parseInt(req.query.page) || 1;
+  const pageSize = 10;
+  const query = keyword
+    ? { title: { $regex: keyword, $options: "i" } }
+    : {};
+  const files = await db.collection("files")
+    .find(query)
+    .sort({ createdAt: -1 })
+    .skip((page - 1) * pageSize)
+    .limit(pageSize)
+    .toArray();
+
+  res.json(files);
 });
+
 
 // SPA 라우팅 처리
 app.get("/{*path}", (req, res) => {
@@ -141,75 +167,12 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log(`✅ Server running on port ${PORT}`);
 });
 
-
-// import express from "express";
-// import multer from "multer";
-// import cors from "cors";
-// import fs from "fs";
-// import path from "path";
-// import { fileURLToPath } from "url";
-
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = path.dirname(__filename);
-
-// const app = express();
-// app.use(cors());
-// app.use(express.json());
-
-// // 정적 파일 제공
-// app.use(express.static(path.join(__dirname, "dist")));
-// app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
-// const DATA_FILE = path.join(__dirname, "fileList.json");
-
-// // 기존 목록 불러오기
-// let fileList = [];
-// if (fs.existsSync(DATA_FILE)) {
-//   fileList = JSON.parse(fs.readFileSync(DATA_FILE));
-// }
-
-// // multer 저장 설정
-// const storage = multer.diskStorage({
-//   destination: path.join(__dirname, "uploads"),
-//   filename: (req, file, cb) => {
-//     cb(null, Date.now() + "-" + file.originalname);
-//   }
-// });
-// const upload = multer({ storage });
-
-// // 업로드 API
-// app.post("/upload", upload.single("file"), (req, res) => {
-//   if (!req.file) {
-//     return res.status(400).json({ error: "파일이 업로드되지 않았습니다." });
-//   }
-
-//   const { title, name } = req.body;
-//   const newFile = {
-//     id: Date.now(),
-//     title,
-//     name,
-//     url: `/uploads/${req.file.filename}`, // localhost 제거
-//     createdAt: new Date().toLocaleString()
-//   };
-
-//   fileList.push(newFile);
-//   fs.writeFileSync(DATA_FILE, JSON.stringify(fileList, null, 2));
-
-//   res.json({ success: true });
-// });
-
-// // 목록 조회 API
-// app.get("/files", (req, res) => {
-//   res.json(fileList);
-// });
-
-// // SPA 라우팅 처리
-// app.get("/{*path}", (req, res) => {
-//   res.sendFile(path.join(__dirname, "dist", "index.html"));
-// });
-
-// // Render 포트 사용
-// const PORT = process.env.PORT || 10000;
-// app.listen(PORT, "0.0.0.0", () => {
-//   console.log(`✅ Server running on port ${PORT}`);
-// });
+const client = new MongoClient(process.env.MONGO_URI);
+let db;
+try {
+  await client.connect();
+  db = client.db("project1"); // DB 이름
+  console.log("✅ MongoDB 연결 성공");
+} catch (err) {
+  console.error("❌ MongoDB 연결 실패:", err);
+}

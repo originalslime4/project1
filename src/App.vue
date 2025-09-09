@@ -3,13 +3,13 @@
     <a @click="rerod">카르마 슬라임</a>
     <b>알림</b>
     <span @click="menu = !menu">三{{ menu }}</span>
-    <img src="./assets/propil.jpg" class="propil" />
+    <img src="./assets/propil.jpg" class="propil" style="height: 37.5px;position: absolute;top: 50%;right:0;transform: translate(-20px, -50%);" />
     <div class="menu" v-if="menu">
-      <router-link class="lk" style="top: 0px" to="/home">홈</router-link>
-      <router-link class="lk" style="top: 60px">개발된 게임</router-link>
-      <router-link class="lk" style="top: 120px">게시판</router-link>
-      <router-link class="lk" style="top: 180px" to="/jjal">짤방</router-link>
-      <router-link class="lk" style="top: 240px">채팅</router-link>
+      <p style="top: 0px" @click="goto='/home'">홈</p>
+      <p style="top: 60px">개발게임</p>
+      <p style="top: 120px">게시판</p>
+      <p style="top: 180px" @click="goto='/jjal'">짤방</p>
+      <p style="top: 240px">채팅</p>
     </div>
   </div>
   <div id="app">
@@ -38,6 +38,7 @@ export default {
   data() {
     return {
       menu: false,
+      goto:""
     };
   },
    methods: {
@@ -46,7 +47,7 @@ export default {
     },
     async checkLogin() {
   try {
-    const res = await axios.get("https://project1-n922.onrender.com/auth/check", {
+    const res = await axios.get("/auth/check", {
       withCredentials: true
     });
     this.loggedIn = res.data.loggedIn;
@@ -55,6 +56,11 @@ export default {
     this.loggedIn = false;
   }
 },
+  },
+  watch: {
+    goto(newVal) {
+      this.$router.push(newVal)
+    },
   },
   components: {
     // HelloWorld
@@ -110,8 +116,35 @@ export default {
   width: 200px;
   height: 1000px;
 }
-.lk {
+.menu p{
   background: rgb(0, 175, 0);
+  color: black;
+  width: 100%;
+  height: 50px;
+  font-size: 250%;
+  font-weight: 1000;
+  border-color: #000000;
+  border-bottom-style: outset;
+  border-top-style: inset;
+  left: 0px;
+  display: flex;
+  align-items: center;      /* 세로 중앙 */
+  justify-content: center;  /* 가로 중앙 */
+  text-align: center;
+  margin: 0;
+}
+.menu2 {
+  background: rgb(255, 255, 255);
+  border-radius: 10px;
+  border-style: inset;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 200px;
+  height: 500px;
+}
+.lk2 {
+  background: rgb(255, 255, 255);
   color: black;
   font-size: 25px;
   font-weight: 1000;
@@ -125,11 +158,20 @@ export default {
 .propil {
   background: #000000;
   border-radius: 100%;
-  height: 37.5px;
-  position: absolute;
-  top: 50%;
-  right: 0;
-  transform: translate(-20px, -50%);
   padding: 5px;
+}
+.image-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+.image-grid img {
+  min-width: 100px;
+  max-width: 100px;
+  width: fit-content;
+  height: fit-content;
+  border-radius: 10px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
 }
 </style>
