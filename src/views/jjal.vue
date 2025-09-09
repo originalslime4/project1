@@ -28,7 +28,7 @@
   <div>
     <h1>d</h1>
   </div>
-  <div v-if="!loggedIn" style="margin: 20px">
+  <div v-if="!userinfo.loggedIn" style="margin: 20px">
     <button @click="loginWithGoogle">Google 로그인</button>
   </div>
 
@@ -111,7 +111,7 @@ export default {
       this.file = e.target.files[0];
     },
     async uploadFile() {
-      if (!this.loggedIn) {
+      if (!this.userinfo.loggedIn) {
         alert("로그인 후 업로드 가능합니다.");
         return;
       }
