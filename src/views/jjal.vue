@@ -101,7 +101,7 @@ export default {
       return `https://drive.google.com/thumbnail?id=${fileId}&sz=w${size}`;
     },
     handleImageError(e) {
-      e.target.src = require("../assets/non.png"); // 또는 절대 경로
+      e.target.src = new URL("../assets/non.png", import.meta.url).href;
     },
 
     rerod() {
