@@ -32,7 +32,25 @@ app.use(cors({
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "dist")));
 
+// 최상단
+const client = new MongoClient(process.env.MONGO_URI);
+let db;
 
+async function startServer() {
+  try {
+    await client.connect();
+    db = client.db("project1");
+    console.log("✅ MongoDB 연결 성공");
+
+    app.listen(PORT, () => {
+      console.log(`✅ Server running on port ${PORT}`);
+    });
+  } catch (err) {
+    console.error("❌ MongoDB 연결 실패:", err);
+  }
+}
+
+startServer();
 
 const upload = multer({ dest: "temp/" }); // 임시 저장 폴더
 
@@ -165,19 +183,3 @@ const PORT = process.env.PORT || 10000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`✅ Server running on port ${PORT}`);
 });
-
-async function startServer() {
-  try {
-    await client.connect();
-    db = client.db("project1");
-    console.log("✅ MongoDB 연결 성공");
-
-    app.listen(PORT, "0.0.0.0", () => {
-      console.log(`✅ Server running on port ${PORT}`);
-    });
-  } catch (err) {
-    console.error("❌ MongoDB 연결 실패:", err);
-  }
-}
-
-startServer();
