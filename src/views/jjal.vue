@@ -68,6 +68,7 @@
 
 <script>
 import axios from "axios";
+axios.defaults.baseURL = "https://project1-n922.onrender.com";
 axios.defaults.withCredentials = true;
 // const api = axios.create({
 //   baseURL: "/",
@@ -131,7 +132,7 @@ export default {
       }
     },
     async getFiles() {
-  const res = await axios.get("https://project1-n922.onrender.com/files", {
+  const res = await axios.get("/files", {
     params: {
       page: this.serchinfo.currentPage,
       q: this.serchinfo.searchKeyword
@@ -143,7 +144,7 @@ export default {
 },
     async checkLogin() {
   try {
-    const res = await axios.get("https://project1-n922.onrender.com/auth/check", {
+    const res = await axios.get("/auth/check", {
       withCredentials: true,
     });
     this.userinfo.loggedIn=res.data.loggedIn;
@@ -161,7 +162,7 @@ export default {
   }
 },
     loginWithGoogle() {
-      window.location.href = "https://project1-n922.onrender.com/login";
+      window.location.href = "/login";
     },
     prevPage() {
     if (this.serchinfo.currentPage > 1) {
@@ -182,7 +183,7 @@ export default {
     },
   },
 
-  created() {
+  mounted() {
     this.checkLogin();
     this.getFiles();
   },
