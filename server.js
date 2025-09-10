@@ -108,7 +108,7 @@ app.get("/oauth2callback", async (req, res) => {
   req.session.tokens = tokens;
   req.session.save(() => {
     console.log("세션 저장 완료:", req.session.tokens);
-    res.redirect("https://project1-n922.onrender.com/jjal");
+    res.redirect("/jjal");
   });
 
 });
