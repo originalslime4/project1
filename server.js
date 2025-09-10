@@ -58,9 +58,8 @@ app.get("/auth/check", async (req, res) => {
     return res.status(401).json({ loggedIn: false });
   }
 
-  oauth2Client.setCredentials(req.session.tokens);
-
   try {
+    oauth2Client.setCredentials(req.session.tokens);
     const oauth2 = google.oauth2({ version: "v2", auth: oauth2Client });
     const userInfo = await oauth2.userinfo.get();
 
@@ -72,7 +71,7 @@ app.get("/auth/check", async (req, res) => {
     });
   } catch (err) {
     console.error("사용자 정보 가져오기 실패", err);
-    res.status(500).json({ error: "사용자 정보 가져오기 실패" });
+    res.status(500).json({ error: "서버 내부 오류", detail: err.message });
   }
 });
 
@@ -167,12 +166,18 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log(`✅ Server running on port ${PORT}`);
 });
 
-const client = new MongoClient(process.env.MONGO_URI);
-let db;
-try {
-  await client.connect();
-  db = client.db("project1"); // DB 이름
-  console.log("✅ MongoDB 연결 성공");
-} catch (err) {
-  console.error("❌ MongoDB 연결 실패:", err);
+async function startServer() {
+  try {
+    await client.connect();
+    db = client.db("project1");
+    console.log("✅ MongoDB 연결 성공");
+
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`✅ Server running on port ${PORT}`);
+    });
+  } catch (err) {
+    console.error("❌ MongoDB 연결 실패:", err);
+  }
 }
+
+startServer();
