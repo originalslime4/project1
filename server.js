@@ -21,10 +21,11 @@ app.set("trust proxy", 1);
 app.use(session({
   secret: "tmffkdlavmfhwprxm",
   resave: false,
-  saveUninitialized: false,
+  saveUninitialized: true,
   store: MongoStore.create({
     mongoUrl: process.env.MONGO_URI,
-    dbName: "project1"
+    dbName: "project1",
+    collectionName: "sessions"
   }),
   cookie: {
     secure: true,
@@ -37,6 +38,10 @@ app.use(cors({
 }));
 app.use(express.json());
 
+app.use((req, res, next) => {
+  console.log("세션 객체:", req.session);
+  next();
+});
 
 // 최상단
 const client = new MongoClient(process.env.MONGO_URI);
@@ -107,10 +112,13 @@ app.get("/oauth2callback", async (req, res) => {
   oauth2Client.setCredentials(tokens);
   req.session.tokens = tokens;
   req.session.save(() => {
-    console.log("세션 저장 완료:", req.session.tokens);
-    res.redirect("/jjal");
+    if (err) {
+    console.error("세션 저장 실패:", err);
+    return res.status(500).send("세션 저장 실패");
+  }
+  console.log("세션 저장 완료:", req.session.tokens);
+  res.redirect("/jjal");
   });
-
 });
 
 // 업로드 API → 사용자 Drive에 저장
