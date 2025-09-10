@@ -143,7 +143,7 @@ export default {
 },
     async checkLogin() {
   try {
-    const res = await axios.get("/auth/check", {
+    const res = await axios.get("https://project1-n922.onrender.com/auth/check", {
       withCredentials: true,
     });
     this.userinfo.loggedIn=res.data.loggedIn;
@@ -161,7 +161,7 @@ export default {
   }
 },
     loginWithGoogle() {
-      window.location.href = "/login";
+      window.location.href = "https://project1-n922.onrender.com/login";
     },
     prevPage() {
     if (this.serchinfo.currentPage > 1) {
