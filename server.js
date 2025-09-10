@@ -21,7 +21,7 @@ app.set("trust proxy", 1);
 app.use(session({
   secret: "tmffkdlavmfhwprxm",
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
   store: MongoStore.create({
     mongoUrl: process.env.MONGO_URI,
     dbName: "project1",
@@ -99,9 +99,9 @@ app.get("/auth/check", async (req, res) => {
       picture: userInfo.data.picture
     });
   } catch (err) {
-    console.error("사용자 정보 가져오기 실패", err);
-    res.status(500).json({ error: "서버 내부 오류", detail: err.message });
-  }
+  console.error("사용자 정보 가져오기 실패", err.response?.data || err);
+  res.status(500).json({ error: "서버 내부 오류", detail: err.message });
+}
 });
 
 // 인증 코드 처리
@@ -111,14 +111,15 @@ app.get("/oauth2callback", async (req, res) => {
   console.log("받은 토큰:", tokens); // 여기서 구조 확인
   oauth2Client.setCredentials(tokens);
   req.session.tokens = tokens;
-  req.session.save(() => {
-    if (err) {
-    console.error("세션 저장 실패:", err);
+  req.session.tokens = tokens;
+req.session.save(err => {
+  if (err) {
+    console.error("❌ 세션 저장 실패:", err);
     return res.status(500).send("세션 저장 실패");
   }
-  console.log("세션 저장 완료:", req.session.tokens);
+  console.log("✅ 세션 저장 완료:", req.session.tokens);
   res.redirect("/jjal");
-  });
+});
 });
 
 // 업로드 API → 사용자 Drive에 저장
