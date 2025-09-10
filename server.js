@@ -81,7 +81,7 @@ app.get("/auth/check", async (req, res) => {
   if (!req.session.tokens) {
     return res.status(401).json({ loggedIn: false });
   }
-
+  console.log("세션 토큰:", req.session.tokens);
   try {
     oauth2Client.setCredentials(req.session.tokens);
     const oauth2 = google.oauth2({ version: "v2", auth: oauth2Client });
@@ -103,6 +103,7 @@ app.get("/auth/check", async (req, res) => {
 app.get("/oauth2callback", async (req, res) => {
   const code = req.query.code;
   const { tokens } = await oauth2Client.getToken(code);
+  console.log("받은 토큰:", tokens); // 여기서 구조 확인
   oauth2Client.setCredentials(tokens);
   req.session.tokens = tokens;
   req.session.save(() => {
