@@ -78,10 +78,10 @@ const authUrl = oauth2Client.generateAuthUrl({
 });
 
 app.get("/auth/check", async (req, res) => {
+  console.log("세션 토큰:", req.session.tokens);
   if (!req.session.tokens) {
     return res.status(401).json({ loggedIn: false });
   }
-  console.log("세션 토큰:", req.session.tokens);
   try {
     oauth2Client.setCredentials(req.session.tokens);
     const oauth2 = google.oauth2({ version: "v2", auth: oauth2Client });
