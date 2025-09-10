@@ -8,6 +8,7 @@ import { fileURLToPath } from "url";
 import { google } from "googleapis";
 import dotenv from "dotenv";
 import { MongoClient } from "mongodb";
+import MongoStore from "connect-mongo";
 import { Console } from "console";
 dotenv.config();
 console.log("CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
@@ -21,6 +22,10 @@ app.use(session({
   secret: "tmffkdlavmfhwprxm",
   resave: false,
   saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGO_URI,
+    dbName: "project1"
+  }),
   cookie: {
     secure: true,
     sameSite: "None"
