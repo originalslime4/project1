@@ -36,7 +36,7 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "dist")));
+
 
 // 최상단
 const client = new MongoClient(process.env.MONGO_URI);
@@ -179,7 +179,7 @@ app.get("/files", async (req, res) => {
   res.json(files);
 });
 
-
+app.use(express.static(path.join(__dirname, "dist")));
 // SPA 라우팅 처리
 app.get("/{*path}", (req, res) => {
   res.sendFile(path.join(__dirname, "dist", "index.html"));
