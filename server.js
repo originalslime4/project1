@@ -77,7 +77,12 @@ const oauth2Client = new google.auth.OAuth2(
 app.get("/login", (req, res) => {
 const authUrl = oauth2Client.generateAuthUrl({
   access_type: "offline",
-  scope: ["https://www.googleapis.com/auth/drive.file"],
+  scope: [
+    "https://www.googleapis.com/auth/userinfo.profile",
+    "https://www.googleapis.com/auth/userinfo.email",
+    "https://www.googleapis.com/auth/drive.file"
+  ]
+
 });
   res.redirect(authUrl);
 });
