@@ -96,18 +96,113 @@ app.get("/auth/check", async (req, res) => {
     oauth2Client.setCredentials(req.session.tokens);
     const oauth2 = google.oauth2({ version: "v2", auth: oauth2Client });
     const userInfo = await oauth2.userinfo.get();
-
+const { email, name, picture } = userInfo.data;
+const usersCollection = db.collection("users");
+    let user = await usersCollection.findOne({ email });
+    if (!user) {
+      // 새 사용자 등록
+      user = {
+        email,
+        picture,
+        nickname: name,
+        bio: "",
+        createdAt: new Date(),
+        followers:0
+      };
+      await usersCollection.insertOne(user);
+      console.log("✅ 새 사용자 등록:", email);
+    } else {
+      console.log("🔎 기존 사용자 불러오기:", email);
+    }
+req.session.userEmail = email;
     res.json({
       loggedIn: true,
-      name: userInfo.data.name,
-      email: userInfo.data.email,
-      picture: userInfo.data.picture
+      email: user.email,
+      picture: user.picture,
+      nickname: user.nickname,
+      bio: user.bio,
+      followers:user.followers
     });
   } catch (err) {
   console.error("사용자 정보 가져오기 실패", err.response?.data || err);
   res.status(500).json({ error: "서버 내부 오류", detail: err.message });
 }
 });
+app.put("/user", async (req, res) => {
+  const email = req.session.userEmail;
+  const { nickname, bio, picture } = req.body;
+
+  if (!email) return res.status(401).json({ error: "로그인 필요" });
+
+  try {
+    const result = await db.collection("users").updateOne(
+      { email },
+      { $set: { nickname, bio, picture } }
+    );
+
+    if (result.modifiedCount === 0) {
+      return res.status(404).json({ error: "사용자 없음" });
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("사용자 정보 수정 실패:", err);
+    res.status(500).json({ error: "수정 실패" });
+  }
+});
+app.post("/follow/:targetEmail", async (req, res) => {
+  const follower = req.session.userEmail;
+  const following = req.params.targetEmail;
+
+  if (!follower) return res.status(401).json({ error: "로그인 필요" });
+  if (follower === following) return res.status(400).json({ error: "자기 자신은 팔로우할 수 없음" });
+
+  try {
+    const exists = await db.collection("follows").findOne({ follower, following });
+    if (exists) return res.status(400).json({ error: "이미 팔로우 중" });
+
+    await db.collection("follows").insertOne({ follower, following, followedAt: new Date() });
+    await db.collection("users").updateOne({ email: following }, { $inc: { followers: 1 } });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("팔로우 실패:", err);
+    res.status(500).json({ error: "팔로우 실패" });
+  }
+});
+app.delete("/follow/:targetEmail", async (req, res) => {
+  const follower = req.session.userEmail;
+  const following = req.params.targetEmail;
+
+  if (!follower) return res.status(401).json({ error: "로그인 필요" });
+
+  try {
+    const result = await db.collection("follows").deleteOne({ follower, following });
+    if (result.deletedCount === 0) return res.status(404).json({ error: "팔로우 관계 없음" });
+
+    await db.collection("users").updateOne({ email: following }, { $inc: { followers: -1 } });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("언팔로우 실패:", err);
+    res.status(500).json({ error: "언팔로우 실패" });
+  }
+});
+
+
+app.get("/following", async (req, res) => {
+  const email = req.session.userEmail;
+  if (!email) return res.status(401).json({ error: "로그인 필요" });
+
+  try {
+    const follows = await db.collection("follows").find({ follower: email }).toArray();
+    res.json(follows.map(f => f.following));
+  } catch (err) {
+    console.error("팔로잉 목록 조회 실패:", err);
+    res.status(500).json({ error: "조회 실패" });
+  }
+});
+
 
 // 인증 코드 처리
 app.get("/oauth2callback", async (req, res) => {
@@ -115,7 +210,6 @@ app.get("/oauth2callback", async (req, res) => {
   const { tokens } = await oauth2Client.getToken(code);
   console.log("받은 토큰:", tokens); // 여기서 구조 확인
   oauth2Client.setCredentials(tokens);
-  req.session.tokens = tokens;
   req.session.tokens = tokens;
 req.session.save(err => {
   if (err) {
@@ -127,16 +221,14 @@ req.session.save(err => {
 });
 });
 
-// 업로드 API → 사용자 Drive에 저장
-app.post("/upload", upload.single("file"), async (req, res) => {
+app.post("/upload-file-drive", upload.single("file"), async (req, res) => {
   if (!req.session.tokens) return res.status(401).json({ error: "로그인 필요" });
-  console.log("1")
+
   oauth2Client.setCredentials(req.session.tokens);
   const drive = google.drive({ version: "v3", auth: oauth2Client });
 
-  const { title, name } = req.body;
   const filePath = req.file.path;
-console.log(drive)
+
   try {
     const fileMetadata = { name: req.file.originalname };
     const media = {
@@ -158,15 +250,7 @@ console.log(drive)
     });
 
     const fileUrl = `https://drive.google.com/uc?id=${fileId}`;
-    const newFile = {
-  title,
-  name,
-  url: fileUrl,
-  createdAt: new Date().toLocaleString()
-};
-
-await db.collection("files").insertOne(newFile);
-res.json({ success: true, url: fileUrl });
+    res.json({ success: true, url: fileUrl });
   } catch (err) {
     console.error("Drive 업로드 실패", err);
     res.status(500).json({ error: "업로드 실패" });
@@ -174,16 +258,39 @@ res.json({ success: true, url: fileUrl });
     fs.unlinkSync(filePath); // 임시 파일 삭제
   }
 });
+app.post("/upload-jjal", async (req, res) => {
+  const { title, name, url } = req.body;
+
+  if (!title || !name || !url) {
+    return res.status(400).json({ error: "필수 정보 누락" });
+  }
+
+  try {
+    const newFile = {
+      title,
+      name,
+      url,
+      createdAt: new Date().toLocaleString()
+    };
+
+    await db.collection("jjal").insertOne(newFile);
+    res.json({ success: true });
+  } catch (err) {
+    console.error("DB 저장 실패", err);
+    res.status(500).json({ error: "DB 저장 실패" });
+  }
+});
+
 
 // 목록 조회 API
-app.get("/files", async (req, res) => {
+app.get("/jjals", async (req, res) => {
   const keyword = req.query.q || "";
   const page = parseInt(req.query.page) || 1;
   const pageSize = 10;
   const query = keyword
     ? { title: { $regex: keyword, $options: "i" } }
     : {};
-  const files = await db.collection("files")
+  const files = await db.collection("jjal")
     .find(query)
     .sort({ createdAt: -1 })
     .skip((page - 1) * pageSize)
