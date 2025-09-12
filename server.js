@@ -259,20 +259,31 @@ app.post("/upload-file-drive", upload.single("file"), async (req, res) => {
   }
 });
 app.post("/upload-jjal", async (req, res) => {
-  const { title, name, url } = req.body;
-
-  if (!title || !name || !url) {
+  const { title, email, url } = req.body;
+  if (!title || !email || !url) {
     return res.status(400).json({ error: "필수 정보 누락" });
   }
-
   try {
+    // 1️⃣ 최근 저장된 문서 찾기
+    const recent = await db.collection("jjal")
+      .find({ email })
+      .sort({ createdAt: -1 })
+      .limit(1)
+      .toArray();
+    if (recent.length > 0) {
+      const lastCreated = new Date(recent[0].createdAt);
+      const now = new Date();
+      const diffMinutes = (now - lastCreated) / (1000 * 60);
+      if (diffMinutes < 30) {
+        return res.status(429).json({ error: "30분 이내에는 다시 저장할 수 없습니다." });
+      }
+    }
     const newFile = {
       title,
-      name,
+      email,
       url,
-      createdAt: new Date().toLocaleString()
+      createdAt: new Date() // 날짜 객체로 저장
     };
-
     await db.collection("jjal").insertOne(newFile);
     res.json({ success: true });
   } catch (err) {
