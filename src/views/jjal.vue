@@ -25,18 +25,27 @@
       <p>스튜디오</p>
     </div>
   </div>
-  <div>
-    <h1>d</h1>
-  </div>
+  <h1>d</h1>
   <div v-if="!userinfo.loggedIn" style="margin: 20px">
     <button @click="loginWithGoogle">Google 로그인</button>
   </div>
 
   <div>
+    <p>짤 하나를 올리기 위해선 최소 30분간의 공백이 필효합니다.</p>
     <input type="file" @change="onFileChange" accept="image/*,video/gif" />
+    <img scr="{{file}}" @error="handleImageError($event,'img')" />
     <input v-model="title" placeholder="제목" />
     <input v-model="name" placeholder="이름" />
     <button @click="uploadFile">업로드</button>
+    <div style="margin: 20px;">
+  <input
+    v-model="serchinfo.searchKeyword"
+    @keyup.enter="getFiles"
+    placeholder="검색어를 입력하세요"
+    style="padding: 5px; width: 50%;"
+  />
+  <button @click="getFiles" style="margin-left: 10px;">검색</button>
+</div>
 
     <div class="image-grid">
       <div v-for="item in files" :key="item.id">
@@ -86,8 +95,8 @@ export default {
       menu: false,
       pril: false,
       file: null,
-      title: "",
-      name: "",
+      title:"",
+      stat:"업로드",
       files: [],
       goto:"",
       userinfo:{loggedIn:false,userName:"Unknown",userEmail:"abcdefg1234@gmail.com",userPicture:"",bio:"슬라임의 노예☆입니다",followers:0},
@@ -122,8 +131,10 @@ export default {
     alert("로그인 후 업로드 가능합니다.");
     return null;
   }
+  if (this.userinfo.loggedIn){
   alert("알빠누ㅋ");
   return null;
+  }
   const formData = new FormData();
   formData.append("file", this.file);
 
@@ -141,7 +152,7 @@ export default {
   if (!fileUrl) return; // 업로드 실패 시 중단
   const payload = {
     title: this.title,
-    name: this.name,
+    email: this.userinfo.userEmail,
     url: fileUrl
   };
   try {
