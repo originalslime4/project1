@@ -122,7 +122,8 @@ export default {
     alert("로그인 후 업로드 가능합니다.");
     return null;
   }
-
+  alert("알빠누ㅋ");
+  return null;
   const formData = new FormData();
   formData.append("file", this.file);
 
@@ -216,9 +217,9 @@ export default {
   },
 
   mounted() {
-    // this.checkLogin();
-    // this.getFiles();
-    // this.getFollowData();
+    this.checkLogin();
+    this.getFiles();
+    this.getFollowData();
   },
   components: {
     // HelloWorld
