@@ -54,7 +54,7 @@
           alt="슬라임 이미지"
           @error="handleImageError($event,'img')"
         >
-        <p>{{ item.title }} - {{ item.name }}</p>
+        <p>{{ item.title }}</p>
         <small>{{ item.createdAt }}</small>
       </div>
     </div>
@@ -130,10 +130,6 @@ export default {
   if (!this.userinfo.loggedIn) {
     alert("로그인 후 업로드 가능합니다.");
     return null;
-  }
-  if (this.userinfo.loggedIn){
-  alert("알빠누ㅋ");
-  return null;
   }
   const formData = new FormData();
   formData.append("file", this.file);
