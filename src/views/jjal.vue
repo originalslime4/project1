@@ -165,7 +165,7 @@ export default {
       q: this.serchinfo.searchKeyword
     }
   });
-
+  console.log(res.data.files,res.data.totalPages)
   this.files = res.data.files;
   this.serchinfo.totalPages = res.data.totalPages;
 },
