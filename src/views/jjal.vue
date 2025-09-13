@@ -3,20 +3,45 @@
     <a @click="rerod">{{ Math.random() < 0.5 ? "이런짤" : "저런짤" }} 슬라임</a>
     <b>알림</b>
     <span @click="menu = !menu">三{{ menu }}</span>
-    <img @click="pril = !pril" :src="userinfo.userPicture" class="propil" @error="handleImageError($event,'prl')" style="object-fit:cover;height: 37.5px;width: 37.5px;position: absolute;top: 50%;right:0;transform: translate(-20px, -50%);" />
+    <img
+      @click="pril = !pril"
+      :src="userinfo.userPicture"
+      class="propil"
+      @error="handleImageError($event, 'prl')"
+      style="
+        object-fit: cover;
+        height: 37.5px;
+        width: 37.5px;
+        position: absolute;
+        top: 50%;
+        right: 0;
+        transform: translate(-20px, -50%);
+      "
+    />
     <div class="menu" v-if="menu">
-      <p @click="goto='/home'">홈</p>
+      <p @click="goto = '/home'">홈</p>
       <p>개발게임</p>
       <p>게시판</p>
-      <p @click="goto='/jjal'">짤방</p>
+      <p @click="goto = '/jjal'">짤방</p>
       <p>채팅</p>
     </div>
     <div class="menu2" v-if="pril">
-      <div style="padding:10px;">
-        <img :src="userinfo.userPicture" class="propil" @error="handleImageError($event,'prl')" style="object-fit:cover;width:75px;height: 75px;margin: 0;" />
-        <h3 style="word-break: break-word;margin: 0;">{{userinfo.userName}}</h3>
-        <h3 style="word-break: break-word;margin: 0;">-ers:{{userinfo.followers}} ; -ing:{{following.length}}</h3>
-        <h6 style="word-break: break-word;margin: 0;">{{userinfo.userEmail}}</h6>
+      <div style="padding: 10px">
+        <img
+          :src="userinfo.userPicture"
+          class="propil"
+          @error="handleImageError($event, 'prl')"
+          style="object-fit: cover; width: 75px; height: 75px; margin: 0"
+        />
+        <h3 style="word-break: break-word; margin: 0">
+          {{ userinfo.userName }}
+        </h3>
+        <h3 style="word-break: break-word; margin: 0">
+          -ers:{{ userinfo.followers }} ; -ing:{{ following.length }}
+        </h3>
+        <h6 style="word-break: break-word; margin: 0">
+          {{ userinfo.userEmail }}
+        </h6>
       </div>
       <p>내페이지</p>
       <p>팔로우중</p>
@@ -33,36 +58,43 @@
   <div>
     <p>짤 하나를 올리기 위해선 최소 30분간의 공백이 필효합니다.</p>
     <input type="file" @change="onFileChange" accept="image/*,video/gif" />
-    <img scr="{{file}}" @error="handleImageError($event,'img')" />
+    <img scr="{{file}}" @error="handleImageError($event, 'img')" />
     <input v-model="title" placeholder="제목" />
     <button @click="uploadFile">업로드</button>
-    <div style="margin: 20px;">
-  <input
-    v-model="serchinfo.searchKeyword"
-    @keyup.enter="getFiles"
-    placeholder="검색어를 입력하세요"
-    style="padding: 5px; width: 50%;"
-  />
-  <button @click="getFiles" style="margin-left: 10px;">검색</button>
-</div>
+    <div style="margin: 20px">
+      <input
+        v-model="serchinfo.searchKeyword"
+        @keyup.enter="getFiles"
+        placeholder="검색어를 입력하세요"
+        style="padding: 5px; width: 50%"
+      />
+      <button @click="getFiles" style="margin-left: 10px">검색</button>
+    </div>
 
     <div class="image-grid">
       <div v-for="item in files" :key="item.id">
         <img
           :src="convertDriveLinkToThumbnail(item.url)"
           alt="슬라임 이미지"
-          @error="handleImageError($event,'img')"
-        >
+          @error="handleImageError($event, 'img')"
+        />
         <p>{{ item.title }}</p>
         <small>{{ item.createdAt }}</small>
       </div>
     </div>
   </div>
-<div class="pagination">
-  <button @click="prevPage" :disabled="serchinfo.currentPage === 1">이전</button>
-  <span>{{ serchinfo.currentPage }} / {{ serchinfo.totalPages }}</span>
-  <button @click="nextPage" :disabled="serchinfo.currentPage === serchinfo.totalPages">다음</button>
-</div>
+  <div class="pagination">
+    <button @click="prevPage" :disabled="serchinfo.currentPage === 1">
+      이전
+    </button>
+    <span>{{ serchinfo.currentPage }} / {{ serchinfo.totalPages }}</span>
+    <button
+      @click="nextPage"
+      :disabled="serchinfo.currentPage === serchinfo.totalPages"
+    >
+      다음
+    </button>
+  </div>
 
   <!-- <div v-for="i in 1000" :key="i">
     <h1>대충 엄청난 스토리</h1>
@@ -94,13 +126,20 @@ export default {
       menu: false,
       pril: false,
       file: null,
-      title:"",
-      stat:"업로드",
+      title: "",
+      stat: "업로드",
       files: [],
-      goto:"",
-      userinfo:{loggedIn:false,userName:"Unknown",userEmail:"abcdefg1234@gmail.com",userPicture:"",bio:"슬라임의 노예☆입니다",followers:0},
-      serchinfo:{searchKeyword: "",currentPage: 1,totalPages: 1},
-      following:[]
+      goto: "",
+      userinfo: {
+        loggedIn: false,
+        userName: "Unknown",
+        userEmail: "abcdefg1234@gmail.com",
+        userPicture: "",
+        bio: "슬라임의 노예☆입니다",
+        followers: 0,
+      },
+      serchinfo: { searchKeyword: "", currentPage: 1, totalPages: 1 },
+      following: [],
     };
   },
   methods: {
@@ -111,11 +150,11 @@ export default {
       const fileId = match[1];
       return `https://drive.google.com/thumbnail?id=${fileId}&sz=w${size}`;
     },
-    handleImageError(e,t) {
-      if (t=="img"){
-      e.target.src = require("../assets/non.png"); // 또는 절대 경로
-      } else if (t=="prl") {
-      e.target.src = require("../assets/propil.jpg");
+    handleImageError(e, t) {
+      if (t == "img") {
+        e.target.src = require("../assets/non.png"); // 또는 절대 경로
+      } else if (t == "prl") {
+        e.target.src = require("../assets/propil.jpg");
       }
     },
 
@@ -126,99 +165,99 @@ export default {
       this.file = e.target.files[0];
     },
     async filetourl() {
-  if (!this.userinfo.loggedIn) {
-    alert("로그인 후 업로드 가능합니다.");
-    return null;
-  }
-  const formData = new FormData();
-  formData.append("file", this.file);
+      if (!this.userinfo.loggedIn) {
+        alert("로그인 후 업로드 가능합니다.");
+        return null;
+      }
+      const formData = new FormData();
+      formData.append("file", this.file);
 
-  try {
-    const res = await axios.post("/upload-file-drive", formData);
-    return res.data.url; // 업로드된 파일의 URL 반환
-  } catch (err) {
-    alert("드라이브 업로드 실패: " + (err.response?.data?.error || err.message));
-    return null;
-  }
-},
+      try {
+        const res = await axios.post("/upload-file-drive", formData);
+        return res.data.url; // 업로드된 파일의 URL 반환
+      } catch (err) {
+        alert(
+          "드라이브 업로드 실패: " + (err.response?.data?.error || err.message)
+        );
+        return null;
+      }
+    },
 
     async uploadFile() {
       const fileUrl = await this.filetourl(); // 먼저 업로드 수행
-  if (!fileUrl) return; // 업로드 실패 시 중단
-  const payload = {
-    title: this.title,
-    email: this.userinfo.userEmail,
-    url: fileUrl
-  };
-  try {
-    await axios.post("/upload-jjal", payload);
-    alert("파일 정보 저장 완료!");
-    this.getFiles(); // 목록 갱신
-  } catch (err) {
-    alert("DB 저장 실패: " + (err.response?.data?.error || err.message));
-  }
+      if (!fileUrl) return; // 업로드 실패 시 중단
+      const payload = {
+        title: this.title,
+        email: this.userinfo.userEmail,
+        url: fileUrl,
+      };
+      try {
+        await axios.post("/upload-jjal", payload);
+        alert("파일 정보 저장 완료!");
+        this.getFiles(); // 목록 갱신
+      } catch (err) {
+        alert("DB 저장 실패: " + (err.response?.data?.error || err.message));
+      }
     },
     async getFiles() {
-  const res = await axios.get("/jjals", {
-    params: {
-      page: this.serchinfo.currentPage,
-      q: this.serchinfo.searchKeyword
-    }
-  });
-  console.log(res.data.files,res.data.totalPages)
-  this.files = res.data.files;
-  this.serchinfo.totalPages = res.data.totalPages;
-},
+      const res = await axios.get("/jjals", {
+        params: {
+          page: this.serchinfo.currentPage,
+          q: this.serchinfo.searchKeyword,
+        },
+      });
+      this.files = res.data.files;
+      this.serchinfo.totalPages = res.data.totalPages;
+    },
     async checkLogin() {
-  try {
-    const res = await axios.get("/auth/check", {
-      withCredentials: true,
-    });
-    this.userinfo.loggedIn=res.data.loggedIn;
-    if (res.data.loggedIn) {
-      this.userinfo.userEmail = res.data.email;
-      this.userinfo.userPicture = res.data.picture;
-      this.userinfo.userName = res.data.nickname;
-      this.userinfo.bio = res.data.bio;
-    }
-  } catch (err) {
-    console.error("로그인 확인 실패:", err);
-    this.userinfo.loggedIn = false;
-    this.userinfo.userEmail = "";
-      this.userinfo.userPicture = "";
-      this.userinfo.userName = "";
-      this.userinfo.bio = "";
-  }
-},
+      try {
+        const res = await axios.get("/auth/check", {
+          withCredentials: true,
+        });
+        this.userinfo.loggedIn = res.data.loggedIn;
+        if (res.data.loggedIn) {
+          this.userinfo.userEmail = res.data.email;
+          this.userinfo.userPicture = res.data.picture;
+          this.userinfo.userName = res.data.nickname;
+          this.userinfo.bio = res.data.bio;
+        }
+      } catch (err) {
+        console.error("로그인 확인 실패:", err);
+        this.userinfo.loggedIn = false;
+        this.userinfo.userEmail = "";
+        this.userinfo.userPicture = "";
+        this.userinfo.userName = "";
+        this.userinfo.bio = "";
+      }
+    },
     loginWithGoogle() {
       window.location.href = "/login";
     },
     prevPage() {
-    if (this.serchinfo.currentPage > 1) {
-      this.serchinfo.currentPage--;
-      this.getFiles();
-    }
-  },
-  nextPage() {
-    if (this.serchinfo.currentPage < this.serchinfo.totalPages) {
-      this.serchinfo.currentPage++;
-      this.getFiles();
-    }
-  },
-  async getFollowData() {
-  try {
-    const res = await axios.get("/following");
-    this.following=res.data;
-  } catch (err) {
-    console.error("팔로우 정보 조회 실패:", err);
-    this.following=[];
-  }
-}
-
+      if (this.serchinfo.currentPage > 1) {
+        this.serchinfo.currentPage--;
+        this.getFiles();
+      }
+    },
+    nextPage() {
+      if (this.serchinfo.currentPage < this.serchinfo.totalPages) {
+        this.serchinfo.currentPage++;
+        this.getFiles();
+      }
+    },
+    async getFollowData() {
+      try {
+        const res = await axios.get("/following");
+        this.following = res.data;
+      } catch (err) {
+        console.error("팔로우 정보 조회 실패:", err);
+        this.following = [];
+      }
+    },
   },
   watch: {
     goto(newVal) {
-      this.$router.push(newVal)
+      this.$router.push(newVal);
     },
   },
 
@@ -281,7 +320,7 @@ export default {
   width: 200px;
   height: 1000px;
 }
-.menu p{
+.menu p {
   background: rgb(0, 175, 0);
   color: black;
   width: 100%;
@@ -293,8 +332,8 @@ export default {
   border-top-style: inset;
   left: 0px;
   display: flex;
-  align-items: center;      /* 세로 중앙 */
-  justify-content: center;  /* 가로 중앙 */
+  align-items: center; /* 세로 중앙 */
+  justify-content: center; /* 가로 중앙 */
   text-align: center;
   margin: 0;
 }
@@ -308,7 +347,7 @@ export default {
   width: 200px;
   height: 500px;
 }
-.menu2 p{
+.menu2 p {
   background: rgb(255, 255, 255);
   color: black;
   width: 100%;
@@ -321,8 +360,8 @@ export default {
   border-radius: 10px;
   left: 0px;
   display: flex;
-  align-items: center;      /* 세로 중앙 */
-  justify-content: center;  /* 가로 중앙 */
+  align-items: center; /* 세로 중앙 */
+  justify-content: center; /* 가로 중앙 */
   text-align: center;
   margin: 0;
 }
