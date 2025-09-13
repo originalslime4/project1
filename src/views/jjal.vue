@@ -1,10 +1,16 @@
 <template>
   <div class="home">
-    <a @click="rerod">{{ Math.random() < 0.5 ? "이런짤" : "저런짤" }} 슬라임</a>
+    <a @click="rerod">{{ mainname }}</a>
     <b>알림</b>
     <span @click="menu = !menu">三{{ menu }}</span>
     <img
-      @click="pril = !pril"
+      @click="
+        if (this.userinfo.loggedIn) {
+          pril = !pril;
+        } else {
+          loginWithGoogle();
+        }
+      "
       :src="userinfo.userPicture"
       class="propil"
       @error="handleImageError($event, 'prl')"
@@ -48,18 +54,15 @@
       <p>환경설정</p>
       <p>내가쓴글</p>
       <p>스튜디오</p>
+      <p @click="logout">로그아웃</p>
     </div>
   </div>
-  <h1>d</h1>
-  <div v-if="!userinfo.loggedIn" style="margin: 20px">
-    <button @click="loginWithGoogle">Google 로그인</button>
-  </div>
-
+  <p style="height: 37.5px;">이 글을 보신당신 베이즈 url에 /slimer 을 붙여라</p>
   <div>
     <p>짤 하나를 올리기 위해선 최소 30분간의 공백이 필효합니다.</p>
     <input type="file" @change="onFileChange" accept="image/*,video/gif" />
     <img scr="{{file}}" @error="handleImageError($event, 'img')" />
-    <input v-model="title" placeholder="제목" />
+    <input v-model="title" placeholder="제목 (25자)" maxlength="25" />
     <button @click="uploadFile">업로드</button>
     <div style="margin: 20px">
       <input
@@ -95,15 +98,6 @@
       다음
     </button>
   </div>
-
-  <!-- <div v-for="i in 1000" :key="i">
-    <h1>대충 엄청난 스토리</h1>
-  </div> -->
-  <div id="app">
-    <router-view />
-    <!-- <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="어서오시오 젊은이"/> -->
-  </div>
 </template>
 
 <script>
@@ -123,6 +117,7 @@ export default {
   },
   data() {
     return {
+      mainname: Math.random() < 0.5 ? "이런짤" : "저런짤" + " 슬라임",
       menu: false,
       pril: false,
       file: null,
@@ -164,9 +159,27 @@ export default {
     onFileChange(e) {
       this.file = e.target.files[0];
     },
+    async checkUploadPermission(path, email, min) {
+      try {
+        const res = await axios.get("/limittime", {
+          params: { path, email, min },
+        });
+        if (!res.data.allowed) {
+          alert(`${res.data.remaining}분 후에 다시 업로드 가능`);
+          return false;
+        }
+        return true;
+      } catch (err) {
+        alert(
+          "업로드 가능 여부 확인 실패: " +
+            (err.response?.data?.error || err.message)
+        );
+        return false;
+      }
+    },
     async filetourl() {
       if (!this.userinfo.loggedIn) {
-        alert("로그인 후 업로드 가능합니다.");
+        alert("로그인 후 업로드 가능");
         return null;
       }
       const formData = new FormData();
@@ -184,6 +197,17 @@ export default {
     },
 
     async uploadFile() {
+      if (this.stat != "업로드") return;
+      this.stat = "올리는중";
+      const canUpload = await this.checkUploadPermission(
+        "jjal",
+        this.userinfo.userEmail,
+        30
+      );
+      if (!canUpload) {
+        this.stat = "업로드";
+        return;
+      }
       const fileUrl = await this.filetourl(); // 먼저 업로드 수행
       if (!fileUrl) return; // 업로드 실패 시 중단
       const payload = {
@@ -193,11 +217,12 @@ export default {
       };
       try {
         await axios.post("/upload-jjal", payload);
-        alert("파일 정보 저장 완료!");
+        alert("짤 업로드 성공");
         this.getFiles(); // 목록 갱신
       } catch (err) {
         alert("DB 저장 실패: " + (err.response?.data?.error || err.message));
       }
+      this.stat = "업로드";
     },
     async getFiles() {
       const res = await axios.get("/jjals", {
@@ -232,6 +257,24 @@ export default {
     },
     loginWithGoogle() {
       window.location.href = "/login";
+    },
+    async logout() {
+      try {
+        await axios.get("/logout");
+        this.userinfo = {
+          loggedIn: false,
+          userName: "Unknown",
+          userEmail: "abcdefg1234@gmail.com",
+          userPicture: "",
+          bio: "슬라임의 노예☆입니다",
+          followers: 0,
+        };
+        this.following = [];
+        alert("로그아웃 되었습니다.");
+        //this.$router.push("/home");
+      } catch (err) {
+        alert("로그아웃 실패: " + (err.response?.data?.error || err.message));
+      }
     },
     prevPage() {
       if (this.serchinfo.currentPage > 1) {
@@ -279,96 +322,6 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-}
-.home {
-  right: 0;
-  top: 0;
-  width: 100%;
-  background: rgb(0, 200, 0);
-  border-radius: 5px;
-  position: fixed;
-}
-.home a {
-  color: black;
-  font-size: 37.5px;
-  font-weight: 1000;
-}
-.home b {
-  background: #ffffff;
-  color: black;
-  font-size: 25px;
-  position: absolute;
-  top: 50%;
-  right: 0;
-  transform: translate(-75px, -50%);
-  border-radius: 10px;
-  padding: 5px;
-}
-.home span {
-  color: black;
-  font-size: 37.5px;
-  position: absolute;
-  top: 50%;
-  left: 0;
-  transform: translate(25px, -50%);
-  font-weight: 1000;
-}
-.menu {
-  background: rgb(0, 175, 0);
-  position: absolute;
-  top: 100%;
-  width: 200px;
-  height: 1000px;
-}
-.menu p {
-  background: rgb(0, 175, 0);
-  color: black;
-  width: 100%;
-  height: 50px;
-  font-size: 250%;
-  font-weight: 1000;
-  border-color: #000000;
-  border-bottom-style: outset;
-  border-top-style: inset;
-  left: 0px;
-  display: flex;
-  align-items: center; /* 세로 중앙 */
-  justify-content: center; /* 가로 중앙 */
-  text-align: center;
-  margin: 0;
-}
-.menu2 {
-  background: rgb(255, 255, 255);
-  border-radius: 10px;
-  border-style: inset;
-  position: absolute;
-  top: 100%;
-  right: 0;
-  width: 200px;
-  height: 500px;
-}
-.menu2 p {
-  background: rgb(255, 255, 255);
-  color: black;
-  width: 100%;
-  height: 50px;
-  font-size: 250%;
-  font-weight: 1000;
-  border-color: #000000;
-  border-bottom-style: outset;
-  border-top-style: inset;
-  border-radius: 10px;
-  left: 0px;
-  display: flex;
-  align-items: center; /* 세로 중앙 */
-  justify-content: center; /* 가로 중앙 */
-  text-align: center;
-  margin: 0;
-}
-.propil {
-  background: #000000;
-  border-radius: 100%;
-  padding: 5px;
 }
 .image-grid {
   display: flex;
