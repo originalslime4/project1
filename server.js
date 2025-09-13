@@ -300,13 +300,18 @@ app.get("/jjals", async (req, res) => {
   const query = keyword
     ? { title: { $regex: keyword, $options: "i" } }
     : {};
+    const totalCount = await db.collection("jjal").countDocuments(query);
+    const totalPages = Math.ceil(totalCount / pageSize);
   const files = await db.collection("jjal")
     .find(query)
     .sort({ createdAt: -1 })
     .skip((page - 1) * pageSize)
     .limit(pageSize)
     .toArray();
-    console.log(files)
+    res.json({
+      files,
+      totalPages,
+    });
   res.json(files);
 });
 
