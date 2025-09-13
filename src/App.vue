@@ -1,5 +1,5 @@
 <template>
-  <div style="width: 1000px;height: 1000px;" @mousemove="joke"></div>
+  <div style="width: 100%;height: 100%;position: fixed;" @mousemove="joke"></div>
   <div class="home">
     <a @click="rerod">{{ mainname }}</a>
     <b>알림</b>
