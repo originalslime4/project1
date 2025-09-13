@@ -11,8 +11,6 @@ import { MongoClient } from "mongodb";
 import MongoStore from "connect-mongo";
 import { Console } from "console";
 dotenv.config();
-console.log("CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
-console.log("REDIRECT_URI:", process.env.GOOGLE_REDIRECT_URI);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
@@ -39,7 +37,7 @@ app.use(cors({
 app.use(express.json());
 
 app.use((req, res, next) => {
-  console.log("세션 객체:", req.session);
+  // console.log("세션 객체:", req.session);
   next();
 });
 
@@ -88,7 +86,7 @@ const authUrl = oauth2Client.generateAuthUrl({
 });
 
 app.get("/auth/check", async (req, res) => {
-  console.log("세션 토큰:", req.session.tokens);
+  // console.log("세션 토큰:", req.session.tokens);
   if (!req.session.tokens) {
     return res.status(401).json({ loggedIn: false });
   }
@@ -208,7 +206,7 @@ app.get("/following", async (req, res) => {
 app.get("/oauth2callback", async (req, res) => {
   const code = req.query.code;
   const { tokens } = await oauth2Client.getToken(code);
-  console.log("받은 토큰:", tokens); // 여기서 구조 확인
+  // console.log("받은 토큰:", tokens);
   oauth2Client.setCredentials(tokens);
   req.session.tokens = tokens;
 req.session.save(err => {
@@ -308,7 +306,7 @@ app.get("/jjals", async (req, res) => {
     .skip((page - 1) * pageSize)
     .limit(pageSize)
     .toArray();
-
+    console.log(files)
   res.json(files);
 });
 
