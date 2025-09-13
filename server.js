@@ -282,7 +282,7 @@ app.post("/upload-jjal", async (req, res) => {
       title,
       email,
       url,
-      like,
+      like:0,
       createdAt: new Date() // 날짜 객체로 저장
     };
     await db.collection("jjal").insertOne(newFile);

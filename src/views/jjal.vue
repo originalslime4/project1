@@ -35,7 +35,6 @@
     <input type="file" @change="onFileChange" accept="image/*,video/gif" />
     <img scr="{{file}}" @error="handleImageError($event,'img')" />
     <input v-model="title" placeholder="제목" />
-    <input v-model="name" placeholder="이름" />
     <button @click="uploadFile">업로드</button>
     <div style="margin: 20px;">
   <input
