@@ -84,6 +84,15 @@ app.get("/login", (req, res) => {
   });
   res.redirect(authUrl);
 });
+app.get("/logout", (req, res) => {
+  req.session.destroy(err => {
+    if (err) {
+      return res.status(500).json({ error: "로그아웃 실패" });
+    }
+    res.clearCookie("connect.sid"); // 세션 쿠키 제거
+    res.json({ success: true });
+  });
+});
 
 app.get("/auth/check", async (req, res) => {
   // console.log("세션 토큰:", req.session.tokens);
@@ -215,7 +224,7 @@ app.get("/oauth2callback", async (req, res) => {
       return res.status(500).send("세션 저장 실패");
     }
     console.log("✅ 세션 저장 완료:", req.session.tokens);
-    res.redirect("/jjal");
+    res.redirect("/home");
   });
 });
 
@@ -256,14 +265,13 @@ app.post("/upload-file-drive", upload.single("file"), async (req, res) => {
     fs.unlinkSync(filePath); // 임시 파일 삭제
   }
 });
-app.post("/upload-jjal", async (req, res) => {
-  const { title, email, url } = req.body;
-  if (!title || !email || !url) {
-    return res.status(400).json({ error: "필수 정보 누락" });
+app.get("/limittime", async (req, res) => {
+  const { path, email, min } = req.query;
+  if (!path || !email || !min) {
+    return res.status(400).json({ error: "필수 파라미터 누락" });
   }
   try {
-    // 1️⃣ 최근 저장된 문서 찾기
-    const recent = await db.collection("jjal")
+    const recent = await db.collection(path)
       .find({ email })
       .sort({ createdAt: -1 })
       .limit(1)
@@ -272,10 +280,23 @@ app.post("/upload-jjal", async (req, res) => {
       const lastCreated = new Date(recent[0].createdAt);
       const now = new Date();
       const diffMinutes = (now - lastCreated) / (1000 * 60);
-      if (diffMinutes < 30) {
-        return res.status(429).json({ error: "30분 이내에는 다시 저장할 수 없습니다." });
+      if (diffMinutes < parseInt(min)) {
+        return res.json({ allowed: false, remaining: Math.ceil(min - diffMinutes) });
       }
     }
+    return res.json({ allowed: true });
+  } catch (err) {
+    console.error("시간 제한 확인 실패:", err);
+    return res.status(500).json({ error: "서버 오류" });
+  }
+});
+
+app.post("/upload-jjal", async (req, res) => {
+  const { title, email, url } = req.body;
+  if (!title || !email || !url) {
+    return res.status(400).json({ error: "필수 정보 누락" });
+  }
+  try {
     const newFile = {
       title,
       email,
