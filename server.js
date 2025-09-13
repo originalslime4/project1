@@ -73,15 +73,15 @@ const oauth2Client = new google.auth.OAuth2(
 
 
 app.get("/login", (req, res) => {
-const authUrl = oauth2Client.generateAuthUrl({
-  access_type: "offline",
-  scope: [
-    "https://www.googleapis.com/auth/userinfo.profile",
-    "https://www.googleapis.com/auth/userinfo.email",
-    "https://www.googleapis.com/auth/drive.file"
-  ]
+  const authUrl = oauth2Client.generateAuthUrl({
+    access_type: "offline",
+    scope: [
+      "https://www.googleapis.com/auth/userinfo.profile",
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/drive.file"
+    ]
 
-});
+  });
   res.redirect(authUrl);
 });
 
@@ -94,8 +94,8 @@ app.get("/auth/check", async (req, res) => {
     oauth2Client.setCredentials(req.session.tokens);
     const oauth2 = google.oauth2({ version: "v2", auth: oauth2Client });
     const userInfo = await oauth2.userinfo.get();
-const { email, name, picture } = userInfo.data;
-const usersCollection = db.collection("users");
+    const { email, name, picture } = userInfo.data;
+    const usersCollection = db.collection("users");
     let user = await usersCollection.findOne({ email });
     if (!user) {
       // 새 사용자 등록
@@ -105,26 +105,26 @@ const usersCollection = db.collection("users");
         nickname: name,
         bio: "",
         createdAt: new Date(),
-        followers:0
+        followers: 0
       };
       await usersCollection.insertOne(user);
       console.log("✅ 새 사용자 등록:", email);
     } else {
       console.log("🔎 기존 사용자 불러오기:", email);
     }
-req.session.userEmail = email;
+    req.session.userEmail = email;
     res.json({
       loggedIn: true,
       email: user.email,
       picture: user.picture,
       nickname: user.nickname,
       bio: user.bio,
-      followers:user.followers
+      followers: user.followers
     });
   } catch (err) {
-  console.error("사용자 정보 가져오기 실패", err.response?.data || err);
-  res.status(500).json({ error: "서버 내부 오류", detail: err.message });
-}
+    console.error("사용자 정보 가져오기 실패", err.response?.data || err);
+    res.status(500).json({ error: "서버 내부 오류", detail: err.message });
+  }
 });
 app.put("/user", async (req, res) => {
   const email = req.session.userEmail;
@@ -209,14 +209,14 @@ app.get("/oauth2callback", async (req, res) => {
   // console.log("받은 토큰:", tokens);
   oauth2Client.setCredentials(tokens);
   req.session.tokens = tokens;
-req.session.save(err => {
-  if (err) {
-    console.error("❌ 세션 저장 실패:", err);
-    return res.status(500).send("세션 저장 실패");
-  }
-  console.log("✅ 세션 저장 완료:", req.session.tokens);
-  res.redirect("/jjal");
-});
+  req.session.save(err => {
+    if (err) {
+      console.error("❌ 세션 저장 실패:", err);
+      return res.status(500).send("세션 저장 실패");
+    }
+    console.log("✅ 세션 저장 완료:", req.session.tokens);
+    res.redirect("/jjal");
+  });
 });
 
 app.post("/upload-file-drive", upload.single("file"), async (req, res) => {
@@ -280,7 +280,7 @@ app.post("/upload-jjal", async (req, res) => {
       title,
       email,
       url,
-      like:0,
+      like: 0,
       createdAt: new Date() // 날짜 객체로 저장
     };
     await db.collection("jjal").insertOne(newFile);
@@ -300,19 +300,18 @@ app.get("/jjals", async (req, res) => {
   const query = keyword
     ? { title: { $regex: keyword, $options: "i" } }
     : {};
-    const totalCount = await db.collection("jjal").countDocuments(query);
-    const totalPages = Math.ceil(totalCount / pageSize);
+  const totalCount = await db.collection("jjal").countDocuments(query);
+  const totalPages = Math.ceil(totalCount / pageSize);
   const files = await db.collection("jjal")
     .find(query)
     .sort({ createdAt: -1 })
     .skip((page - 1) * pageSize)
     .limit(pageSize)
     .toArray();
-    res.json({
-      files,
-      totalPages,
-    });
-  res.json(files);
+  res.json({
+    files,
+    totalPages,
+  });
 });
 
 app.use(express.static(path.join(__dirname, "dist")));
