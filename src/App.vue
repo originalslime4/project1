@@ -1,6 +1,5 @@
 <template>
-  <div style="width: 100%;height: 100%;position: fixed;" @mousemove="joke"></div>
-  <div class="home">
+  <div class="home" :class="{ 'scrolled': isScrolled[0] }">
     <a @click="rerod">{{ mainname }}</a>
     <b>알림</b>
     <span @click="menu = !menu">三{{ menu }}</span>
@@ -85,20 +84,25 @@ export default {
       mainname:"여기 홈 아닌데요",
       menu: false,
       pril: false,
+      isScrolled: [false,100],
       goto: "",
       userinfo: {
         loggedIn: false,
-        // userName: "Unknown",
-        // userEmail: "abcdefg1234@gmail.com",
+        userName: "Unknown",
+        userEmail: "abcdefg1234@gmail.com",
         userPicture: "",
-        // bio: "슬라임의 노예☆입니다",
-        // followers: 0,
+        bio: "슬라임의 노예☆입니다",
+        followers: 0,
       },
-      // following: [],
+      following: [],
+      server:{
+        "/":"여기 홈 아닌데요",
+        "/jjal":Math.random() < 0.5 ? "이런짤 슬라임" : "저런짤 슬라임",
+        "/home":"카르마 슬라임"
+        }
     };
   },
   methods: {
-    joke(){if (window.location.pathname!="/") {this.mainname="꺄아악 어딜보는거에욧!"}},
   //   convertDriveLinkToThumbnail(originalUrl, size = 1000) {
   //     const match = originalUrl.match(/(?:id=|\/d\/)([a-zA-Z0-9_-]{25,})/);
   //     if (!match) return null;
@@ -113,54 +117,89 @@ export default {
         e.target.src = require("./assets/propil.jpg");
       }
     },
-
-    rerod() {
-      this.$router.push({ path: "/reload", query: { place: "/home" } });
+handleScroll() { 
+      this.isScrolled[0] = window.scrollY >= this.isScrolled[1];
+      this.isScrolled[1]=Math.min(Math.max(this.isScrolled[1], window.scrollY-100), window.scrollY+100);
     },
-  //   async checkLogin() {
-  //     try {
-  //       const res = await axios.get("/auth/check", {
-  //         withCredentials: true,
-  //       });
-  //       this.userinfo.loggedIn = res.data.loggedIn;
-  //       if (res.data.loggedIn) {
-  //         this.userinfo.userEmail = res.data.email;
-  //         this.userinfo.userPicture = res.data.picture;
-  //         this.userinfo.userName = res.data.nickname;
-  //         this.userinfo.bio = res.data.bio;
-  //       }
-  //     } catch (err) {
-  //       console.error("로그인 확인 실패:", err);
-  //       this.userinfo.loggedIn = false;
-  //       this.userinfo.userEmail = "";
-  //       this.userinfo.userPicture = "";
-  //       this.userinfo.userName = "";
-  //       this.userinfo.bio = "";
-  //     }
-  //   },
+    rerod() {
+      this.$router.push({ path: "/reload", query: { place: window.location.pathname } });
+    },
+    async logout() {
+      try {
+        await axios.get("/logout");
+        this.userinfo = {
+          loggedIn: false,
+          userName: "Unknown",
+          userEmail: "abcdefg1234@gmail.com",
+          userPicture: "",
+          bio: "슬라임의 노예☆입니다",
+          followers: 0,
+        };
+        this.following = [];
+        alert("로그아웃 되었습니다.");
+        //this.$router.push("/home");
+      } catch (err) {
+        alert("로그아웃 실패: " + (err.response?.data?.error || err.message));
+      }
+    },
+    async checkLogin() {
+      try {
+        const res = await axios.get("/auth/check", {
+          withCredentials: true,
+        });
+        this.userinfo.loggedIn = res.data.loggedIn;
+        if (res.data.loggedIn) {
+          this.userinfo.userEmail = res.data.email;
+          this.userinfo.userPicture = res.data.picture;
+          this.userinfo.userName = res.data.nickname;
+          this.userinfo.bio = res.data.bio;
+        }
+      } catch (err) {
+        console.error("로그인 확인 실패:", err);
+        this.userinfo.loggedIn = false;
+        this.userinfo.userEmail = "";
+        this.userinfo.userPicture = "";
+        this.userinfo.userName = "";
+        this.userinfo.bio = "";
+      }
+    },
     loginWithGoogle() {
       window.location.href = "/login";
     },
-  //   async getFollowData() {
-  //     try {
-  //       const res = await axios.get("/following");
-  //       this.following = res.data;
-  //     } catch (err) {
-  //       console.error("팔로우 정보 조회 실패:", err);
-  //       this.following = [];
-  //     }
-  //   },
+    async getFollowData() {
+      try {
+        const res = await axios.get("/following");
+        this.following = res.data;
+      } catch (err) {
+        console.error("팔로우 정보 조회 실패:", err);
+        this.following = [];
+      }
+    },
   },
   watch: {
+    $route(to, from) {
+      this.menu=false
+      this.pril=false
+      console.log("라우트 변경됨:", from.path, "→", to.path);
+      if (to.path in this.server){
+        this.mainname=this.server[to.path]
+      }else{
+        this.mainname="꺄아악 어딜보는거에욧!";
+      }
+    },
     goto(newVal) {
       this.$router.push(newVal);
     },
   },
 
-  // mounted() {
-  //   this.checkLogin();
-  //   this.getFollowData();
-  // },
+  mounted() {
+    this.checkLogin();
+    this.getFollowData();
+  window.addEventListener("scroll", this.handleScroll);
+  },
+  beforeUnmount() {
+    window.removeEventListener("scroll", this.handleScroll);
+  },
   // components: {
   //   // HelloWorld
   // },
@@ -182,6 +221,11 @@ export default {
   background: rgb(0, 200, 0);
   border-radius: 5px;
   position: fixed;
+  transition: transform 0.1s ease;
+
+}
+.home.scrolled {
+  transform: translateY(-50px); /* 위로 올리기 */
 }
 .home a {
   color: black;
