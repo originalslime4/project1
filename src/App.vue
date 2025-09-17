@@ -24,14 +24,14 @@
         transform: translate(-20px, -50%);
       "
     />
-    <div class="menu" v-if="menu">
+    <div class="menu" :class="{ 'clmu': !menu }">
       <p @click="goto = '/home'">홈</p>
       <p>개발게임</p>
       <p>게시판</p>
       <p @click="goto = '/jjal'">짤방</p>
       <p>채팅</p>
     </div>
-    <div class="menu2" v-if="pril">
+    <div class="menu2" :class="{ 'clmu': !pril }">
       <div style="padding: 10px">
         <img
           :src="userinfo.userPicture"
@@ -222,10 +222,9 @@ handleScroll() {
   border-radius: 5px;
   position: fixed;
   transition: transform 0.1s ease;
-
 }
 .home.scrolled {
-  transform: translateY(-50px); /* 위로 올리기 */
+  transform: translateY(-100%); /* 위로 올리기 */
 }
 .home a {
   color: black;
@@ -258,6 +257,10 @@ handleScroll() {
   top: 100%;
   width: 200px;
   height: 1000px;
+  transition: transform 0.1s ease;
+}
+.menu.clmu{
+  transform: translateX(-100%);
 }
 .menu p {
   background: rgb(0, 175, 0);
@@ -285,6 +288,10 @@ handleScroll() {
   right: 0;
   width: 200px;
   height: 500px;
+  transition: transform 0.1s ease;
+}
+.menu2.clmu{
+  transform: translateX(100%);
 }
 .menu2 p {
   background: rgb(255, 255, 255);

@@ -17,7 +17,7 @@
     </div>
 
     <div class="image-grid">
-      <div @click="reload" v-for="item in files" :key="item.id">
+      <div v-for="item in files" :key="item.id" @click="rerod">
         <div class="imagecard">
           <img
             :src="convertDriveLinkToThumbnail(item.url)"
@@ -41,6 +41,9 @@
     >
       다음
     </button>
+  </div>
+  <div>
+
   </div>
 </template>
 
@@ -75,7 +78,13 @@ title:"혁명은 바람과도 같지, 늘 내곁에 있으니",
 email:"original.slime4@gmail.com",
 url:"https://drive.google.com/uc?id=1CKC-WTbTwTNXkpH_qYhk13T8UYG8z-rj",
 like:0,
-createdAt:"2025-09-13T03:19:42.738+00:00"}],
+createdAt:"2025-09-13T03:19:42.738+00:00"},
+{_id:"68ca397d92bd9b25c0ef9a49",
+title:"의사양반",
+email:"original.slime4@gmail.com",
+url:"https://drive.google.com/uc?id=1zh2EqHkbyOQNXVjPO4uL8EZtm6KbAJNu",
+like:0,
+createdAt:"2025-09-17T04:30:53.802+00:00"}],
       goto: "",
       userinfo: {
         loggedIn: false,
@@ -101,6 +110,9 @@ createdAt:"2025-09-13T03:19:42.738+00:00"}],
       } else if (t == "prl") {
         e.target.src = require("../assets/propil.jpg");
       }
+    },
+    rerod() {
+      this.$router.push({ path: "/reload", query: { place: window.location.pathname } });
     },
     onFileChange(e) {
       this.file = e.target.files[0];
@@ -244,6 +256,7 @@ createdAt:"2025-09-13T03:19:42.738+00:00"}],
 }
 .image-grid img {
   max-height: 375px;
+  max-width: 150px;
   width: fit-content;
   height: fit-content;
   border-radius: 10px;
@@ -253,13 +266,14 @@ createdAt:"2025-09-13T03:19:42.738+00:00"}],
   background: rgb(200, 200, 200);
   width: 150px;
   max-height: 375px;
-  min-height: 100px;
+  min-height: 150px;
+  border-radius: 10px;
 }
 .image-grid p {
   margin: 0;
   text-align: left;
   word-break: break-all;
-  width: 150PX;
+  width: 150px;
 }
 </style>//할일 프로필 연령제한 헤더
 // git add .
