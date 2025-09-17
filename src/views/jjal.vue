@@ -1,62 +1,4 @@
 <template>
-  <div class="home">
-    <a @click="rerod">{{ mainname }}</a>
-    <b>알림</b>
-    <span @click="menu = !menu">三{{ menu }}</span>
-    <img
-      @click="
-        if (this.userinfo.loggedIn) {
-          pril = !pril;
-        } else {
-          loginWithGoogle();
-        }
-      "
-      :src="userinfo.userPicture"
-      class="propil"
-      @error="handleImageError($event, 'prl')"
-      style="
-        object-fit: cover;
-        height: 37.5px;
-        width: 37.5px;
-        position: absolute;
-        top: 50%;
-        right: 0;
-        transform: translate(-20px, -50%);
-      "
-    />
-    <div class="menu" v-if="menu">
-      <p @click="goto = '/home'">홈</p>
-      <p>개발게임</p>
-      <p>게시판</p>
-      <p @click="goto = '/jjal'">짤방</p>
-      <p>채팅</p>
-    </div>
-    <div class="menu2" v-if="pril">
-      <div style="padding: 10px">
-        <img
-          :src="userinfo.userPicture"
-          class="propil"
-          @error="handleImageError($event, 'prl')"
-          style="object-fit: cover; width: 75px; height: 75px; margin: 0"
-        />
-        <h3 style="word-break: break-word; margin: 0">
-          {{ userinfo.userName }}
-        </h3>
-        <h3 style="word-break: break-word; margin: 0">
-          -ers:{{ userinfo.followers }} ; -ing:{{ following.length }}
-        </h3>
-        <h6 style="word-break: break-word; margin: 0">
-          {{ userinfo.userEmail }}
-        </h6>
-      </div>
-      <p>내페이지</p>
-      <p>팔로우중</p>
-      <p>환경설정</p>
-      <p>내가쓴글</p>
-      <p>스튜디오</p>
-      <p @click="logout">로그아웃</p>
-    </div>
-  </div>
   <p style="height: 37.5px;">이 글을 보신당신 베이즈 url에 /slimer 을 붙여라</p>
   <div>
     <p>짤 하나를 올리기 위해선 최소 30분간의 공백이 필효합니다.</p>
@@ -75,14 +17,16 @@
     </div>
 
     <div class="image-grid">
-      <div v-for="item in files" :key="item.id">
-        <img
-          :src="convertDriveLinkToThumbnail(item.url)"
-          alt="슬라임 이미지"
-          @error="handleImageError($event, 'img')"
-        />
+      <div @click="reload" v-for="item in files" :key="item.id">
+        <div class="imagecard">
+          <img
+            :src="convertDriveLinkToThumbnail(item.url)"
+            alt="슬라임 이미지"
+            @error="handleImageError($event, 'img')"
+          />
+        </div>
         <p>{{ item.title }}</p>
-        <small>{{ item.createdAt }}</small>
+        <p style="font-size:10px;">{{ new Date(item.createdAt).toLocaleString() }}</p>
       </div>
     </div>
   </div>
@@ -117,13 +61,21 @@ export default {
   },
   data() {
     return {
-      mainname: Math.random() < 0.5 ? "이런짤" : "저런짤" + " 슬라임",
-      menu: false,
-      pril: false,
       file: null,
       title: "",
       stat: "업로드",
-      files: [],
+      files: [{_id:"68c4cb8183fac5249c2d76a1",
+title:"새 시대",
+email:"original.slime4@gmail.com",
+url:"https://drive.google.com/uc?id=1xtY8Lrzo-Ndf_ZfnfxP6N8g6aX068Ceq",
+like:0,
+createdAt:"2025-09-13T01:40:17.081+00:00"},
+{_id:"68c4e2ceae8a37fbee15b656",
+title:"혁명은 바람과도 같지, 늘 내곁에 있으니",
+email:"original.slime4@gmail.com",
+url:"https://drive.google.com/uc?id=1CKC-WTbTwTNXkpH_qYhk13T8UYG8z-rj",
+like:0,
+createdAt:"2025-09-13T03:19:42.738+00:00"}],
       goto: "",
       userinfo: {
         loggedIn: false,
@@ -131,10 +83,8 @@ export default {
         userEmail: "abcdefg1234@gmail.com",
         userPicture: "",
         bio: "슬라임의 노예☆입니다",
-        followers: 0,
       },
       serchinfo: { searchKeyword: "", currentPage: 1, totalPages: 1 },
-      following: [],
     };
   },
   methods: {
@@ -151,10 +101,6 @@ export default {
       } else if (t == "prl") {
         e.target.src = require("../assets/propil.jpg");
       }
-    },
-
-    rerod() {
-      this.$router.push({ path: "/reload", query: { place: "/jjal" } });
     },
     onFileChange(e) {
       this.file = e.target.files[0];
@@ -255,27 +201,6 @@ export default {
         this.userinfo.bio = "";
       }
     },
-    loginWithGoogle() {
-      window.location.href = "/login";
-    },
-    async logout() {
-      try {
-        await axios.get("/logout");
-        this.userinfo = {
-          loggedIn: false,
-          userName: "Unknown",
-          userEmail: "abcdefg1234@gmail.com",
-          userPicture: "",
-          bio: "슬라임의 노예☆입니다",
-          followers: 0,
-        };
-        this.following = [];
-        alert("로그아웃 되었습니다.");
-        //this.$router.push("/home");
-      } catch (err) {
-        alert("로그아웃 실패: " + (err.response?.data?.error || err.message));
-      }
-    },
     prevPage() {
       if (this.serchinfo.currentPage > 1) {
         this.serchinfo.currentPage--;
@@ -288,26 +213,15 @@ export default {
         this.getFiles();
       }
     },
-    async getFollowData() {
-      try {
-        const res = await axios.get("/following");
-        this.following = res.data;
-      } catch (err) {
-        console.error("팔로우 정보 조회 실패:", err);
-        this.following = [];
-      }
-    },
   },
   watch: {
     goto(newVal) {
       this.$router.push(newVal);
     },
   },
-
   mounted() {
     this.checkLogin();
     this.getFiles();
-    this.getFollowData();
   },
   components: {
     // HelloWorld
@@ -326,18 +240,28 @@ export default {
 .image-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
   justify-content: center;
 }
 .image-grid img {
-  min-width: 100px;
-  max-width: 100px;
+  max-height: 375px;
   width: fit-content;
   height: fit-content;
   border-radius: 10px;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
 }
-</style>
+.imagecard{
+  background: rgb(200, 200, 200);
+  width: 150px;
+  max-height: 375px;
+  min-height: 100px;
+}
+.image-grid p {
+  margin: 0;
+  text-align: left;
+  word-break: break-all;
+  width: 150PX;
+}
+</style>//할일 프로필 연령제한 헤더
 // git add .
 // git commit -m "버그"
 // git push origin main 

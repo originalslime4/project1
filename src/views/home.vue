@@ -1,62 +1,4 @@
 <template>
-  <div class="home">
-    <a @click="rerod">{{ mainname }}</a>
-    <b>알림</b>
-    <span @click="menu = !menu">三{{ menu }}</span>
-    <img
-      @click="
-        if (this.userinfo.loggedIn) {
-          pril = !pril;
-        } else {
-          loginWithGoogle();
-        }
-      "
-      :src="userinfo.userPicture"
-      class="propil"
-      @error="handleImageError($event, 'prl')"
-      style="
-        object-fit: cover;
-        height: 37.5px;
-        width: 37.5px;
-        position: absolute;
-        top: 50%;
-        right: 0;
-        transform: translate(-20px, -50%);
-      "
-    />
-    <div class="menu" v-if="menu">
-      <p @click="goto = '/home'">홈</p>
-      <p>개발게임</p>
-      <p>게시판</p>
-      <p @click="goto = '/jjal'">짤방</p>
-      <p>채팅</p>
-    </div>
-    <div class="menu2" v-if="pril">
-      <div style="padding: 10px">
-        <img
-          :src="userinfo.userPicture"
-          class="propil"
-          @error="handleImageError($event, 'prl')"
-          style="object-fit: cover; width: 75px; height: 75px; margin: 0"
-        />
-        <h3 style="word-break: break-word; margin: 0">
-          {{ userinfo.userName }}
-        </h3>
-        <h3 style="word-break: break-word; margin: 0">
-          -ers:{{ userinfo.followers }} ; -ing:{{ following.length }}
-        </h3>
-        <h6 style="word-break: break-word; margin: 0">
-          {{ userinfo.userEmail }}
-        </h6>
-      </div>
-      <p>내페이지</p>
-      <p>팔로우중</p>
-      <p>환경설정</p>
-      <p>내가쓴글</p>
-      <p>스튜디오</p>
-      <p @click="logout">로그아웃</p>
-    </div>
-  </div>
   <p style="height: 37.5px;">이 글을 보신당신 베이즈 url에 /slimer 을 붙여라</p>
   현재 "홈"은 업데이트 되지 않았습다 짤이나봐라
   <!-- <div v-if="!userinfo.loggedIn" style="margin: 20px">
@@ -122,9 +64,6 @@ export default {
   },
   data() {
     return {
-      mainname:"카르마 슬라임",
-      menu: false,
-      pril: false,
       title: "",
       stat: "업로드",
       files: [],
