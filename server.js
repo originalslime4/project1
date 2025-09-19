@@ -7,7 +7,7 @@ import session from "express-session";
 import { fileURLToPath } from "url";
 import { google } from "googleapis";
 import dotenv from "dotenv";
-import { MongoClient } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 import MongoStore from "connect-mongo";
 import { Console } from "console";
 dotenv.config();
@@ -338,7 +338,7 @@ app.post("/jjallike", async (req, res) => {
   const email = req.session.userEmail;
   const { id, islike, mod } = req.body;
   if (!email) return res.status(401).json({ error: "로그인 필요" });
-  const jjalId = new MongoClient.ObjectId(id);
+  const jjalId = new ObjectId(id);
   const likesCollection = db.collection("likes");
   const jjalsCollection = db.collection("jjal");
   try {

@@ -56,9 +56,9 @@
     style="position: relative;width: 100%;height: 100%;object-fit: contain;z-index: 1;"/>
     <p style="font-size:37.5px;margin: 0;border-bottom-style: outset;border-top-style: inset;">{{files[indfile[0]].title}}</p>
     <div style="display: flex; justify-content: center; align-items: center; gap: 10%;margin: 10px 0">
-      <button style="padding: 10px 24px; font-size: 15px;" @click="like(files[indfile[0]].id, true, false);getFiles();">추천</button>
+      <button style="padding: 10px 24px; font-size: 15px;" @click="like(files[indfile[0]]._id, true, false);getFiles();">추천</button>
       <h1>{{files[indfile[0]].like}}</h1>
-      <button style="padding: 10px 24px; font-size: 15px;" @click="like(files[indfile[0]].id, false, false);getFiles();">비추</button>
+      <button style="padding: 10px 24px; font-size: 15px;" @click="like(files[indfile[0]]._id, false, false);getFiles();">비추</button>
     </div>
     <div style="display: flex; align-items: center; gap: 10px;">
       <p style="font-size: 25px;margin: 0;">
