@@ -73,7 +73,7 @@ axios.defaults.withCredentials = true;
 //   withCredentials: true
 // });
 
-// import HelloWorld from './components/HelloWorld.vue'
+import HelloWorld from './components/HelloWorld'
 export default {
   name: "AppPage",
   setup() {
@@ -81,6 +81,7 @@ export default {
   },
   data() {
     return {
+      limbtt: 0,
       mainname:"여기 홈 아닌데요",
       menu: false,
       pril: false,
@@ -122,7 +123,15 @@ handleScroll() {
       this.isScrolled[1]=Math.min(Math.max(this.isScrolled[1], window.scrollY-100), window.scrollY+100);
     },
     rerod() {
+      this.limbtt += 1;
+      if (HelloWorld[this.limbtt]) {alert(HelloWorld[this.limbtt]);}
+      if (this.limbtt==1){
       this.$router.push({ path: "/reload", query: { place: window.location.pathname } });
+      }
+      var last=this.limbtt
+      setTimeout(() => {
+      if (last==this.limbtt){this.limbtt = 0;}
+      }, Math.min(last*250+500,5000));
     },
     async logout() {
       try {

@@ -93,7 +93,29 @@ app.get("/logout", (req, res) => {
     res.json({ success: true });
   });
 });
-
+app.get("/userdata", async (req, res) => {
+  try {
+    const email = req.query.email;
+    if (!email) {
+      return res.status(400).json({ error: "이메일이 필요합니다." });
+    }
+    const usersCollection = db.collection("users");
+    const user = await usersCollection.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: "사용자를 찾을 수 없습니다." });
+    }
+    res.json({
+      email: user.email,
+      picture: user.picture,
+      nickname: user.nickname,
+      bio: user.bio,
+      followers: user.followers
+    });
+  } catch (err) {
+    console.error("사용자 정보 가져오기 실패:", err);
+    res.status(500).json({ error: "서버 내부 오류", detail: err.message });
+  }
+});
 app.get("/auth/check", async (req, res) => {
   // console.log("세션 토큰:", req.session.tokens);
   if (!req.session.tokens) {
@@ -302,6 +324,7 @@ app.post("/upload-jjal", async (req, res) => {
       email,
       url,
       like: 0,
+      hate: 0,
       createdAt: new Date() // 날짜 객체로 저장
     };
     await db.collection("jjal").insertOne(newFile);
@@ -311,8 +334,61 @@ app.post("/upload-jjal", async (req, res) => {
     res.status(500).json({ error: "DB 저장 실패" });
   }
 });
-
-
+app.post("/jjallike", async (req, res) => {
+  const email = req.session.userEmail;
+  const { id, islike, mod } = req.body;
+  if (!email) return res.status(401).json({ error: "로그인 필요" });
+  const jjalId = new MongoClient.ObjectId(id);
+  const likesCollection = db.collection("likes");
+  const jjalsCollection = db.collection("jjal");
+  try {
+    const existing = await likesCollection.findOne({ jjalId, email });
+    if (mod) {
+      return res.json({
+        liked: existing?.type === "like" || false,
+        disliked: existing?.type === "hate" || false
+      });
+    }
+    if (existing?.type === (islike ? "like" : "hate")) {
+      await likesCollection.deleteOne({ _id: existing._id });
+      await jjalsCollection.updateOne(
+        { _id: jjalId },
+        { $inc: { [islike ? "like" : "hate"]: -1 } }
+      );
+      return res.json({ success: true, action: "cancel" });
+    }
+    if (existing) {
+      await likesCollection.updateOne(
+        { _id: existing._id },
+        { $set: { type: islike ? "like" : "hate" } }
+      );
+      await jjalsCollection.updateOne(
+        { _id: jjalId },
+        {
+          $inc: {
+            [islike ? "like" : "hate"]: 1,
+            [islike ? "hate" : "like"]: -1
+          }
+        }
+      );
+      return res.json({ success: true, action: "switch" });
+    }
+    await likesCollection.insertOne({
+      jjalId,
+      email,
+      type: islike ? "like" : "hate",
+      createdAt: new Date()
+    });
+    await jjalsCollection.updateOne(
+      { _id: jjalId },
+      { $inc: { [islike ? "like" : "hate"]: 1 } }
+    );
+    return res.json({ success: true, action: "new" });
+  } catch (err) {
+    console.error("추천/비추천 처리 실패:", err);
+    res.status(500).json({ error: "서버 오류" });
+  }
+});
 // 목록 조회 API
 app.get("/jjals", async (req, res) => {
   const keyword = req.query.q || "";
