@@ -65,7 +65,7 @@
         아티스트: {{ otherinfo.userName }}
       </p>
       <img
-        :src="userinfo.userPicture"
+        :src="otherinfo.userPicture"
         class="propil"
         @error="handleImageError($event, 'prl')"
         style="object-fit: cover; width: 50px; height: 50px; margin: 0; border-radius: 50%;"
@@ -289,18 +289,30 @@ createdAt:"2025-09-17T04:30:53.802+00:00"}
       if (last==this.limbtt){this.limbtt = 0;}
       }, Math.min(last*250+500,5000));
     },
-    getuse(iml) {
-    axios.get("/userdata", {
-      params: { email: iml }
+    async getuse(iml) {
+  try {
+    const res = await axios.get("/userdata", {
+      params: { email: iml },
+      withCredentials: true // 세션 기반 인증 시 필요
     });
-    },
+    const data = res.data;
+    this.otherinfo.userEmail = res.data.email;
+    this.otherinfo.userPicture = res.data.picture;
+    this.otherinfo.userName = res.data.nickname;
+    this.otherinfo.bio = res.data.bio;
+    console.log("사용자 정보:", this.otherinfo);
+  } catch (err) {
+    console.error("사용자 정보 가져오기 실패:", err);
+    alert("사용자 정보를 불러오지 못했습니다.");
+  }
+},
 async like(id, islike, mod) {
   this.limbtt += 1;
       if (HelloWorld[this.limbtt]) {alert(HelloWorld[this.limbtt]);}
       if (this.limbtt==1){
   const payload = { id, islike, mod };
   try {
-    const res = await axios.post("/like", payload, { withCredentials: true });
+    const res = await axios.post("/jjallike", payload, { withCredentials: true });
     return res.data; // liked/disliked 상태 또는 success/action
   } catch (err) {
     alert("에러: " + (err.response?.data?.error || err.message));
