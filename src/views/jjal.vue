@@ -295,7 +295,6 @@ createdAt:"2025-09-17T04:30:53.802+00:00"}
       params: { email: iml },
       withCredentials: true // 세션 기반 인증 시 필요
     });
-    const data = res.data;
     this.otherinfo.userEmail = res.data.email;
     this.otherinfo.userPicture = res.data.picture;
     this.otherinfo.userName = res.data.nickname;
