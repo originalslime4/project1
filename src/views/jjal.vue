@@ -17,7 +17,7 @@
     </div>
 
     <div class="image-grid">
-      <div v-for="(item, index) in files" :key="item.id" @click="indfile[0]=index;indfile[1]=true;getuse(item.email)">
+      <div v-for="(item, index) in files" :key="item.id" @click="indfile[0]=index;openui()">
         <div class="imagecard">
           <img
             :src="convertDriveLinkToThumbnail(item.url)"
@@ -56,9 +56,9 @@
     style="position: relative;width: 100%;height: 100%;object-fit: contain;z-index: 1;"/>
     <p style="font-size:37.5px;margin: 0;border-bottom-style: outset;border-top-style: inset;">{{files[indfile[0]].title}}</p>
     <div style="display: flex; justify-content: center; align-items: center; gap: 10%;margin: 10px 0">
-      <button style="padding: 10px 24px; font-size: 15px;" @click="like(files[indfile[0]]._id, true, false);files[indfile[0]].like+=1;">추천({{files[indfile[0]].like}})</button>
-      <h1>{{files[indfile[0]].like-files[indfile[0]].hate}}</h1>
-      <button style="padding: 10px 24px; font-size: 15px;" @click="like(files[indfile[0]]._id, false, false);files[indfile[0]].like-=1;">비추천</button>
+      <button :style="{padding: '10px 24px',fontSize: '15px',border: '5px solid '+(likeviwe ===1?'green':'black')}" @click="like(files[indfile[0]]._id, true, false);likeviwe=(likeviwe==1)?0:1;">추천({{ files[indfile[0]].like + likeviwe }})</button>
+      <h1>{{files[indfile[0]].like-files[indfile[0]].hate+likeviwe}}</h1>
+      <button :style="{padding: '10px 24px',fontSize: '15px',border: '5px solid '+(likeviwe ===-1?'red':'black')}" @click="like(files[indfile[0]]._id, false, false);likeviwe=(likeviwe==-1)?0:-1;;">비추천</button>
     </div>
     <div style="display: flex; align-items: center; gap: 10px;">
       <p style="font-size: 25px;margin: 0;">
@@ -93,6 +93,7 @@ export default {
   },
   data() {
     return {
+      likeviwe:0,
       limbtt: 0,
       file: null,
       title: "",
@@ -138,6 +139,14 @@ createdAt:"2025-09-17T04:30:53.802+00:00"}
     };
   },
   methods: {
+    openui(){
+      this.indfile[1]=true
+      this.getuse(this.item.email)
+      this.likeviwe=0
+      const dt=this.like(this.files[this.indfile[0]]._id, true, true)
+      if (dt.like){this.files[this.indfile[0]].like-=1;this.likeviwe=1}else
+      if (dt.hate){this.files[this.indfile[0]].hate-=1;this.likeviwe=-1}
+    },
     convertDriveLinkToThumbnail(originalUrl, size = 1000) {
       const match = originalUrl.match(/(?:id=|\/d\/)([a-zA-Z0-9_-]{25,})/);
       if (!match) return null;

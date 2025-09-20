@@ -345,8 +345,8 @@ app.post("/jjallike", async (req, res) => {
     const existing = await likesCollection.findOne({ jjalId, email });
     if (mod) {
       return res.json({
-        liked: existing?.type === "like" || false,
-        disliked: existing?.type === "hate" || false
+        like: existing?.type === "like" || false,
+        hate: existing?.type === "hate" || false
       });
     }
     if (existing?.type === (islike ? "like" : "hate")) {
