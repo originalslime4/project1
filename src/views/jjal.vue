@@ -17,7 +17,7 @@
     </div>
 
     <div class="image-grid">
-      <div v-for="(item, index) in files" :key="item.id" @click="indfile[0]=index;openui()">
+      <div v-for="(item, index) in files" :key="item.id" @click="indfile[0]=index;this.getuse(item.email);openui()">
         <div class="imagecard">
           <img
             :src="convertDriveLinkToThumbnail(item.url)"
@@ -141,7 +141,6 @@ createdAt:"2025-09-17T04:30:53.802+00:00"}
   methods: {
     openui(){
       this.indfile[1]=true
-      this.getuse(this.item.email)
       this.likeviwe=0
       const dt=this.like(this.files[this.indfile[0]]._id, true, true)
       console.log(dt)
