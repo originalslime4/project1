@@ -56,9 +56,9 @@
     style="position: relative;width: 100%;height: 100%;object-fit: contain;z-index: 1;"/>
     <p style="font-size:37.5px;margin: 0;border-bottom-style: outset;border-top-style: inset;">{{files[indfile[0]].title}}</p>
     <div style="display: flex; justify-content: center; align-items: center; gap: 10%;margin: 10px 0">
-      <button style="padding: 10px 24px; font-size: 15px;" @click="like(files[indfile[0]]._id, true, false);getFiles();">추천</button>
-      <h1>{{files[indfile[0]].like}}</h1>
-      <button style="padding: 10px 24px; font-size: 15px;" @click="like(files[indfile[0]]._id, false, false);getFiles();">비추</button>
+      <button style="padding: 10px 24px; font-size: 15px;" @click="like(files[indfile[0]]._id, true, false);files[indfile[0]].like+=1;">추천({{files[indfile[0]].like}})</button>
+      <h1>{{files[indfile[0]].like-files[indfile[0]].hate}}</h1>
+      <button style="padding: 10px 24px; font-size: 15px;" @click="like(files[indfile[0]]._id, false, false);files[indfile[0]].like-=1;">비추천</button>
     </div>
     <div style="display: flex; align-items: center; gap: 10px;">
       <p style="font-size: 25px;margin: 0;">
@@ -78,7 +78,7 @@
 
 <script>
 import axios from "axios";
-axios.defaults.baseURL = "https://project1-n922.onrender.com";
+axios.defaults.baseURL = "https://www.kmslime.kr";
 axios.defaults.withCredentials = true;
 // const api = axios.create({
 //   baseURL: "/",
@@ -102,19 +102,22 @@ export default {
 title:"새 시대",
 email:"original.slime4@gmail.com",
 url:"https://drive.google.com/uc?id=1xtY8Lrzo-Ndf_ZfnfxP6N8g6aX068Ceq",
-like:0,
+like:1,
+hate: 0,
 createdAt:"2025-09-13T01:40:17.081+00:00"},
 {_id:"68c4e2ceae8a37fbee15b656",
 title:"혁명은 바람과도 같지, 늘 내곁에 있으니",
 email:"original.slime4@gmail.com",
 url:"https://drive.google.com/uc?id=1CKC-WTbTwTNXkpH_qYhk13T8UYG8z-rj",
 like:0,
+hate: 1,
 createdAt:"2025-09-13T03:19:42.738+00:00"},
 {_id:"68ca397d92bd9b25c0ef9a49",
 title:"의사양반",
 email:"original.slime4@gmail.com",
 url:"https://drive.google.com/uc?id=1zh2EqHkbyOQNXVjPO4uL8EZtm6KbAJNu",
-like:0,
+like:1,
+hate: 1,
 createdAt:"2025-09-17T04:30:53.802+00:00"}
 ],
       goto: "",

@@ -31,7 +31,7 @@ app.use(session({
   }
 }));
 app.use(cors({
-  origin: "https://project1-n922.onrender.com", // 또는 Render 배포 주소
+  origin: "https://www.kmslime.kr", // 또는 Render 배포 주소
   credentials: true
 }));
 app.use(express.json());
