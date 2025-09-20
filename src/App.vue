@@ -66,7 +66,7 @@
 
 <script>
 import axios from "axios";
-axios.defaults.baseURL = "https://project1-n922.onrender.com";
+axios.defaults.baseURL = "https://www.kmslime.kr";
 axios.defaults.withCredentials = true;
 // const api = axios.create({
 //   baseURL: "/",
