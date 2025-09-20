@@ -144,6 +144,7 @@ createdAt:"2025-09-17T04:30:53.802+00:00"}
       this.getuse(this.item.email)
       this.likeviwe=0
       const dt=this.like(this.files[this.indfile[0]]._id, true, true)
+      console.log(dt)
       if (dt.like){this.files[this.indfile[0]].like-=1;this.likeviwe=1}else
       if (dt.hate){this.files[this.indfile[0]].hate-=1;this.likeviwe=-1}
     },
