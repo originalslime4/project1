@@ -232,7 +232,7 @@ createdAt:"2025-09-17T04:30:53.802+00:00"}
       var last=this.limbtt
       setTimeout(() => {
       if (last==this.limbtt){this.limbtt = 0;}
-      }, Math.min(last*250+500,5000));
+      }, Math.min(last*250+250,5000));
     },
     async getFiles() {
       this.limbtt += 1;
@@ -250,7 +250,7 @@ createdAt:"2025-09-17T04:30:53.802+00:00"}
       var last=this.limbtt
       setTimeout(() => {
       if (last==this.limbtt){this.limbtt = 0;}
-      }, Math.min(last*250+500,5000));
+      }, Math.min(last*250+250,5000));
     },
     async checkLogin() {
       try {
@@ -285,7 +285,7 @@ createdAt:"2025-09-17T04:30:53.802+00:00"}
       var last=this.limbtt
       setTimeout(() => {
       if (last==this.limbtt){this.limbtt = 0;}
-      }, Math.min(last*250+500,5000));
+      }, Math.min(last*250+250,5000));
     },
     nextPage() {
       this.limbtt += 1;
@@ -299,7 +299,7 @@ createdAt:"2025-09-17T04:30:53.802+00:00"}
       var last=this.limbtt
       setTimeout(() => {
       if (last==this.limbtt){this.limbtt = 0;}
-      }, Math.min(last*250+500,5000));
+      }, Math.min(last*250+250,5000));
     },
     async getuse(iml) {
   try {
@@ -333,7 +333,7 @@ async like(id, islike, mod) {
       var last=this.limbtt
       setTimeout(() => {
       if (last==this.limbtt){this.limbtt = 0;}
-      }, Math.min(last*250+500,5000));
+      }, Math.min(last*250+250,5000));
 }
   },
   watch: {

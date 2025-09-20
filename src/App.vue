@@ -131,7 +131,7 @@ handleScroll() {
       var last=this.limbtt
       setTimeout(() => {
       if (last==this.limbtt){this.limbtt = 0;}
-      }, Math.min(last*250+500,5000));
+      }, Math.min(last*250+250,5000));
     },
     async logout() {
       try {
