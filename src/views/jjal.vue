@@ -387,7 +387,7 @@ async like(id, islike, mod) {
   opacity: 1;
   transform: translateX(0);
 }
-</style>//할일 프로필 연령제한 헤더
+</style>//할일 프로필 연령제한
 // git add .
 // git commit -m "버그"
 // git push origin main 
