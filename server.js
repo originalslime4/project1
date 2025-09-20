@@ -30,18 +30,8 @@ app.use(session({
     sameSite: "None"
   }
 }));
-const allowedOrigins = [
-  "https://kmslime.kr",
-  "https://www.kmslime.kr"
-];
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
+  origin: "https://kmslime.kr", // 또는 Render 배포 주소
   credentials: true
 }));
 app.use(express.json());
