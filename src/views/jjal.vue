@@ -139,10 +139,10 @@ createdAt:"2025-09-17T04:30:53.802+00:00"}
     };
   },
   methods: {
-    openui(){
+    async openui(){
       this.indfile[1]=true
       this.likeviwe=0
-      const dt=this.like(this.files[this.indfile[0]]._id, true, true)
+      const dt = await this.like(this.files[this.indfile[0]]._id, true, true)
       console.log(dt)
       if (dt.like){this.files[this.indfile[0]].like-=1;this.likeviwe=1}else
       if (dt.hate){this.files[this.indfile[0]].hate-=1;this.likeviwe=-1}
