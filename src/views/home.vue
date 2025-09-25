@@ -1,16 +1,11 @@
 <template>
   <p style="height: 37.5px;">이 글을 보신당신 베이즈 url에 /slimer 을 붙여라</p>
-  현재 "홈"은 업데이트 되지 않았습다 짤이나봐라
-  <!-- <div v-if="!userinfo.loggedIn" style="margin: 20px">
-    <button @click="loginWithGoogle">Google 로그인</button>
-  </div>
-
   <div>
-    <p>짤 하나를 올리기 위해선 최소 30분간의 공백이 필효합니다.</p>
-    <input type="file" @change="onFileChange" accept="image/*,video/gif" />
-    <img scr="{{file}}" @error="handleImageError($event, 'img')" />
-    <input v-model="title" placeholder="제목" />
-    <button @click="uploadFile">업로드</button>
+    <div style="display: flex; justify-content: center; align-items: center; gap: 10%;margin: 0px 0">
+      <img style="max-height: 75px;max-width: 75px;object-fit: contain;" src="https://tse2.mm.bing.net/th/id/OIP.txdpkHasWBQ_lBx_l54KJgHaFL?rs=1&pid=ImgDetMain&o=7&rm=3" alt="유튜브" @click="jumpto='https://www.youtube.com/@KmSlime'">
+      <img style="max-height: 75px;max-width: 75px;object-fit: contain;" src="https://tse4.mm.bing.net/th/id/OIP.ddwi3bmslyhy-NkaFel1DwAAAA?rs=1&pid=ImgDetMain&o=7&rm=3" alt="디스코드" @click="jumpto='https://discord.gg/CB9ESjfQub'">
+      <img style="max-height: 75px;max-width: 75px;object-fit: contain;" src="https://blog.hootsuite.com/wp-content/uploads/2022/08/kakaotalk.jpg" alt="카카오톡" @click="jumpto='https://open.kakao.com/o/gve6MTTh'">
+    </div>
     <div style="margin: 20px">
       <input
         v-model="serchinfo.searchKeyword"
@@ -22,14 +17,16 @@
     </div>
 
     <div class="image-grid">
-      <div v-for="item in files" :key="item.id">
-        <img
-          :src="convertDriveLinkToThumbnail(item.url)"
-          alt="슬라임 이미지"
-          @error="handleImageError($event, 'img')"
-        />
+      <div v-for="(item, index) in files" :key="item.id" @click="indfile[0]=index;this.getuse(item.email);openui()">
+        <div class="imagecard">
+          <img
+            :src="convertDriveLinkToThumbnail(item.url)"
+            alt="슬라임 이미지"
+            @error="handleImageError($event, 'img')"
+          />
+        </div>
         <p>{{ item.title }}</p>
-        <small>{{ item.createdAt }}</small>
+        <p style="font-size:10px;">{{ new Date(item.createdAt).toLocaleString() }}</p>
       </div>
     </div>
   </div>
@@ -44,7 +41,40 @@
     >
       다음
     </button>
-  </div> -->
+  </div>
+  <div class="viwe" :class="{ 'chag': indfile[1] }" style="position: fixed;background: rgba(0, 0, 0,0.5);width:100%;height:100%;top:0;left:0;">
+    <div style="text-align: left;margin: 0;word-break: break-all;position: fixed;width:80%;height:80%;background: rgb(200, 255, 200);left:50%;top:5%;transform: translateX(-50%);overflow-y: auto;padding: 20px;border-radius: 10px;">
+      <img
+    :src="convertDriveLinkToThumbnail(files[indfile[0]].url)"
+    alt="슬라임 이미지"
+    @error="handleImageError($event, 'img')"
+    style="position: absolute;width: 95%;height: 95%;object-fit: cover;filter: blur(50px);z-index: 0;"/>
+  <img
+    :src="convertDriveLinkToThumbnail(files[indfile[0]].url)"
+    alt="슬라임 이미지"
+    @error="handleImageError($event, 'img')"
+    style="position: relative;width: 100%;height: 100%;object-fit: contain;z-index: 1;"/>
+    <p style="font-size:37.5px;margin: 0;border-bottom-style: outset;border-top-style: inset;">{{files[indfile[0]].title}}</p>
+    <div style="display: flex; justify-content: center; align-items: center; gap: 10%;margin: 10px 0">
+      <button :style="{padding: '10px 24px',fontSize: '15px',border: '5px solid '+(likeviwe ===1?'green':'black')}" @click="like(files[indfile[0]]._id, true, false);likeviwe=(likeviwe==1)?0:1;">추천({{ files[indfile[0]].like + likeviwe }})</button>
+      <h1>{{files[indfile[0]].like-files[indfile[0]].hate+likeviwe}}</h1>
+      <button :style="{padding: '10px 24px',fontSize: '15px',border: '5px solid '+(likeviwe ===-1?'red':'black')}" @click="like(files[indfile[0]]._id, false, false);likeviwe=(likeviwe==-1)?0:-1;;">비추천</button>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <p style="font-size: 25px;margin: 0;">
+        아티스트: {{ otherinfo.userName }}
+      </p>
+      <img
+        :src="otherinfo.userPicture"
+        class="propil"
+        @error="handleImageError($event, 'prl')"
+        style="object-fit: cover; width: 50px; height: 50px; margin: 0; border-radius: 50%;"
+      />
+    </div>
+    <p style="font-size:15px;">{{files[indfile[0]].tags}}</p>
+    <p style="font-size:15px;">{{new Date(files[indfile[0]].createdAt).toLocaleString()}}</p>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -56,7 +86,7 @@ axios.defaults.withCredentials = true;
 //   withCredentials: true
 // });
 
-//import HelloWorld from './components/HelloWorld.vue'
+import HelloWorld from '../components/HelloWorld'
 export default {
   name: "jallPage",
   setup() {
@@ -64,23 +94,81 @@ export default {
   },
   data() {
     return {
+      likeviwe:0,
+      limbtt: 0,
+      file: null,
       title: "",
-      stat: "업로드",
-      files: [],
+      indfile:[0,false],
+      files: [
+        {_id:"68c4cb8183fac5249c2d76a1",
+title:"새 시대",
+email:"original.slime4@gmail.com",
+url:"https://drive.google.com/uc?id=1xtY8Lrzo-Ndf_ZfnfxP6N8g6aX068Ceq",
+like:1,
+hate: 0,
+createdAt:"2025-09-13T01:40:17.081+00:00"},
+{_id:"68c4e2ceae8a37fbee15b656",
+title:"혁명은 바람과도 같지, 늘 내곁에 있으니",
+email:"original.slime4@gmail.com",
+url:"https://drive.google.com/uc?id=1CKC-WTbTwTNXkpH_qYhk13T8UYG8z-rj",
+like:0,
+hate: 1,
+createdAt:"2025-09-13T03:19:42.738+00:00"},
+{_id:"68ca397d92bd9b25c0ef9a49",
+title:"의사양반",
+email:"original.slime4@gmail.com",
+url:"https://drive.google.com/uc?id=1zh2EqHkbyOQNXVjPO4uL8EZtm6KbAJNu",
+like:1,
+hate: 1,
+createdAt:"2025-09-17T04:30:53.802+00:00"}
+],
       goto: "",
+      jumpto: "",
       userinfo: {
+        userName: "Unknown",
+        userEmail: "abcdefg1234@gmail.com",
+        userPicture: "",
+        bio: "슬라임의 노예☆입니다",
+      },
+      otherinfo:{
         loggedIn: false,
         userName: "Unknown",
         userEmail: "abcdefg1234@gmail.com",
         userPicture: "",
         bio: "슬라임의 노예☆입니다",
-        followers: 0,
       },
       serchinfo: { searchKeyword: "", currentPage: 1, totalPages: 1 },
-      following: [],
     };
   },
   methods: {
+    async openui(){
+      this.indfile[1]=true
+      this.likeviwe=0
+      const dt = await this.like(this.files[this.indfile[0]]._id, true, true)
+      console.log(dt)
+      if (dt.like){this.files[this.indfile[0]].like-=1;this.likeviwe=1}else
+      if (dt.hate){this.files[this.indfile[0]].hate-=1;this.likeviwe=-1}
+    },
+    async analyzeImage(url) {
+    try {
+      const res = await axios.post("/analyze-image", { url });
+      const safe = res.data.safe;
+      const labels = res.data.labels;
+      if (safe.adult === "LIKELY" || safe.adult === "VERY_LIKELY") {labels.push("야스적")}
+      if (safe.violence === "LIKELY" || safe.violence === "VERY_LIKELY") {labels.push("폭력적")}
+      if (safe.spoof === "LIKELY" || safe.spoof === "VERY_LIKELY") {labels.push("패러디적")}
+      if (safe.medical === "LIKELY" || safe.medical === "VERY_LIKELY") {labels.push("의학적")}
+      if (safe.racy === "LIKELY" || safe.racy === "VERY_LIKELY") {labels.push("선정적")}
+      return labels;
+    } catch (err) {
+      if (err.response?.status === 429) {
+        alert(err.response.data.error);
+      } else {
+        alert("분석 실패: " + (err.response?.data?.error || err.message));
+      }
+      return null;
+    }
+  },
     convertDriveLinkToThumbnail(originalUrl, size = 1000) {
       const match = originalUrl.match(/(?:id=|\/d\/)([a-zA-Z0-9_-]{25,})/);
       if (!match) return null;
@@ -95,20 +183,100 @@ export default {
         e.target.src = require("../assets/propil.jpg");
       }
     },
-
-    rerod() {
-      this.$router.push({ path: "/reload", query: { place: "/jjal" } });
+    
+    onFileChange(e) {
+      this.file = e.target.files[0];
     },
-    // async getFiles() {
-    //   const res = await axios.get("/jjals", {
-    //     params: {
-    //       page: this.serchinfo.currentPage,
-    //       q: this.serchinfo.searchKeyword,
-    //     },
-    //   });
-    //   this.files = res.data.files;
-    //   this.serchinfo.totalPages = res.data.totalPages;
-    // },
+    async checkUploadPermission(path, email, min) {
+      try {
+        const res = await axios.get("/limittime", {
+          params: { path, email, min },
+        });
+        if (!res.data.allowed) {
+          alert(`${res.data.remaining}분 후에 다시 업로드 가능`);
+          return false;
+        }
+        return true;
+      } catch (err) {
+        alert(
+          "업로드 가능 여부 확인 실패: " +
+            (err.response?.data?.error || err.message)
+        );
+        return false;
+      }
+    },
+    async filetourl() {
+      if (!this.userinfo.loggedIn) {
+        alert("로그인 후 업로드 가능");
+        return null;
+      }
+      const formData = new FormData();
+      formData.append("file", this.file);
+
+      try {
+        const res = await axios.post("/upload-file-drive", formData);
+        return res.data.url; // 업로드된 파일의 URL 반환
+      } catch (err) {
+        alert(
+          "드라이브 업로드 실패: " + (err.response?.data?.error || err.message)
+        );
+        return null;
+      }
+    },
+    async uploadFile() {
+      this.limbtt += 1;
+      if (HelloWorld[this.limbtt]) {alert(HelloWorld[this.limbtt]);}
+      if (this.limbtt==1){
+      const canUpload = await this.checkUploadPermission(
+        "jjal",
+        this.userinfo.userEmail,
+        30
+      );
+      if (!canUpload) {
+        return;
+      }
+      const fileUrl = await this.filetourl(); // 먼저 업로드 수행
+      if (!fileUrl) return; // 업로드 실패 시 중단
+      const sres = await this.analyzeImage(fileUrl);
+      if (!sres) return;
+      const payload = {
+        title: this.title,
+        email: this.userinfo.userEmail,
+        url: fileUrl,
+        tags: sres,
+      };
+      try {
+        await axios.post("/upload-jjal", payload);
+        alert("짤 업로드 성공");
+        this.getFiles();
+      } catch (err) {
+        alert("DB 저장 실패: " + (err.response?.data?.error || err.message));
+      }
+      }
+      var last=this.limbtt
+      setTimeout(() => {
+      if (last==this.limbtt){this.limbtt = 0;}
+      }, Math.min(last*250+250,5000));
+    },
+    async getFiles() {
+      this.limbtt += 1;
+      if (HelloWorld[this.limbtt]) {alert(HelloWorld[this.limbtt]);}
+      if (this.limbtt==1){
+      const res = await axios.get("/jjals", {
+        params: {
+          page: this.serchinfo.currentPage,
+          q: this.serchinfo.searchKeyword,
+          safe:0
+        },
+      });
+      this.files = res.data.files;
+      this.serchinfo.totalPages = res.data.totalPages;
+      }
+      var last=this.limbtt
+      setTimeout(() => {
+      if (last==this.limbtt){this.limbtt = 0;}
+      }, Math.min(last*250+250,5000));
+    },
     async checkLogin() {
       try {
         const res = await axios.get("/auth/check", {
@@ -130,44 +298,80 @@ export default {
         this.userinfo.bio = "";
       }
     },
-    loginWithGoogle() {
-      window.location.href = "/login";
-    },
-    // prevPage() {
-    //   if (this.serchinfo.currentPage > 1) {
-    //     this.serchinfo.currentPage--;
-    //     this.getFiles();
-    //   }
-    // },
-    // nextPage() {
-    //   if (this.serchinfo.currentPage < this.serchinfo.totalPages) {
-    //     this.serchinfo.currentPage++;
-    //     this.getFiles();
-    //   }
-    // },
-    async getFollowData() {
-      try {
-        const res = await axios.get("/following");
-        this.following = res.data;
-      } catch (err) {
-        console.error("팔로우 정보 조회 실패:", err);
-        this.following = [];
+    prevPage() {
+      this.limbtt += 1;
+      if (HelloWorld[this.limbtt]) {alert(HelloWorld[this.limbtt]);}
+      if (this.limbtt==1){
+      if (this.serchinfo.currentPage > 1) {
+        this.serchinfo.currentPage--;
+        this.getFiles();
       }
+      }
+      var last=this.limbtt
+      setTimeout(() => {
+      if (last==this.limbtt){this.limbtt = 0;}
+      }, Math.min(last*250+250,5000));
     },
+    nextPage() {
+      this.limbtt += 1;
+      if (HelloWorld[this.limbtt]) {alert(HelloWorld[this.limbtt]);}
+      if (this.limbtt==1){
+      if (this.serchinfo.currentPage < this.serchinfo.totalPages) {
+        this.serchinfo.currentPage++;
+        this.getFiles();
+      }
+      }
+      var last=this.limbtt
+      setTimeout(() => {
+      if (last==this.limbtt){this.limbtt = 0;}
+      }, Math.min(last*250+250,5000));
+    },
+    async getuse(iml) {
+  try {
+    const res = await axios.get("/userdata", {
+      params: { email: iml },
+      withCredentials: true // 세션 기반 인증 시 필요
+    });
+    this.otherinfo.userEmail = res.data.email;
+    this.otherinfo.userPicture = res.data.picture;
+    this.otherinfo.userName = res.data.nickname;
+    this.otherinfo.bio = res.data.bio;
+    console.log("사용자 정보:", this.otherinfo);
+  } catch (err) {
+    console.error("사용자 정보 가져오기 실패:", err);
+    alert("사용자 정보를 불러오지 못했습니다.");
+  }
+},
+async like(id, islike, mod) {
+  this.limbtt += 1;
+      if (HelloWorld[this.limbtt]) {alert(HelloWorld[this.limbtt]);}
+      if (this.limbtt==1){
+  const payload = { id, islike, mod };
+  try {
+    const res = await axios.post("/jjallike", payload, { withCredentials: true });
+    return res.data; // liked/disliked 상태 또는 success/action
+  } catch (err) {
+    alert("에러: " + (err.response?.data?.error || err.message));
+    return null;
+  }
+  }
+      var last=this.limbtt
+      setTimeout(() => {
+      if (last==this.limbtt){this.limbtt = 0;}
+      }, Math.min(last*250+250,5000));
+}
   },
   watch: {
     goto(newVal) {
       this.$router.push(newVal);
     },
+    jumpto(newVal) {
+      window.location.href = newVal
+    },
   },
-
   mounted() {
     this.checkLogin();
-    // this.getFiles();
-    this.getFollowData();
-  },
-  components: {
-    // HelloWorld
+    this.getFiles();
   },
 };
 </script>
@@ -180,7 +384,71 @@ export default {
   text-align: center;
   color: #2c3e50;
 }
-</style>
+.image-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.image-grid img {
+  max-height: 375px;
+  max-width: 150px;
+  object-fit: contain;
+  border-radius: 10px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+.imagecard{
+  background: rgb(200, 200, 200);
+  width: 150px;
+  max-height: 375px;
+  min-height: 150px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.image-grid p {
+  margin: 0;
+  text-align: left;
+  word-break: break-all;
+  width: 150px;
+}
+.viwe{
+  transition: opacity 0.1s ease;
+  opacity: 0;
+  transform: translateX(100%);
+}
+.viwe.chag{
+  opacity: 1;
+  transform: translateX(0);
+}
+</style>//할일 프로필 연령제한
 // git add .
 // git commit -m "버그"
 // git push origin main 
+// async updateUserInfo(nickname, bio, picture) {
+//     try {
+//       const res = await axios.put("/user", { nickname, bio, picture });
+//       return res.data.success;
+//     } catch (err) {
+//       console.error("사용자 정보 수정 실패:", err);
+//       return false;
+//     }
+//   },
+// async followUser(targetEmail) {
+//     try {
+//       const res = await axios.post(`/follow/${targetEmail}`);
+//       return res.data.success;
+//     } catch (err) {
+//       console.error("팔로우 실패:", err);
+//       return false;
+//     }
+//   },
+// async unfollowUser(targetEmail) {
+//     try {
+//       const res = await axios.delete(`/follow/${targetEmail}`);
+//       return res.data.success;
+//     } catch (err) {
+//       console.error("언팔로우 실패:", err);
+//       return false;
+//     }
+//   },

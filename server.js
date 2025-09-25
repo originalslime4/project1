@@ -10,6 +10,7 @@ import dotenv from "dotenv";
 import { MongoClient, ObjectId } from "mongodb";
 import MongoStore from "connect-mongo";
 import { Console } from "console";
+import vision from "@google-cloud/vision";
 dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -42,15 +43,15 @@ app.use((req, res, next) => {
 });
 
 // 최상단
-const client = new MongoClient(process.env.MONGO_URI);
+const monclient = new MongoClient(process.env.MONGO_URI);
+const visclient = new vision.ImageAnnotatorClient();
 let db;
 
 async function startServer() {
   try {
-    await client.connect();
-    db = client.db("project1");
+    await monclient.connect();
+    db = monclient.db("project1");
     console.log("✅ MongoDB 연결 성공");
-
     app.listen(PORT, () => {
       console.log(`✅ Server running on port ${PORT}`);
     });
@@ -60,7 +61,6 @@ async function startServer() {
 }
 
 startServer();
-
 const upload = multer({ dest: "temp/" }); // 임시 저장 폴더
 
 const oauth2Client = new google.auth.OAuth2(
@@ -70,7 +70,32 @@ const oauth2Client = new google.auth.OAuth2(
 );
 
 
+// // const res = await axios.post("http://localhost:10000/analyze-image", {
+//   url: "https://example.com/test.jpg"
+// });
+// console.log(res.data);
 
+app.post("/analyze-image", async (req, res) => {
+  try {
+    const { url } = req.body;
+
+    // SafeSearch (유해 이미지 감지)
+    const [safeResult] = await visclient.safeSearchDetection(url);
+    const safe = safeResult.safeSearchAnnotation;
+    // 라벨 태깅
+    const [labelResult] = await visclient.labelDetection(url);
+    const labels = labelResult.labelAnnotations.map(l => l.description);
+
+    res.json({ safe, labels });
+  } catch (err) {
+  if (err.code === 429) { // Quota 초과
+    return res.status(429).json({ 
+      error: "월간 한도를 소진했으니 이번달엔 게시가 불가합니다" 
+    });
+  }
+  throw err;
+  }
+});
 
 app.get("/login", (req, res) => {
   const authUrl = oauth2Client.generateAuthUrl({
@@ -314,7 +339,7 @@ app.get("/limittime", async (req, res) => {
 });
 
 app.post("/upload-jjal", async (req, res) => {
-  const { title, email, url } = req.body;
+  const { title, email, url, tags } = req.body;
   if (!title || !email || !url) {
     return res.status(400).json({ error: "필수 정보 누락" });
   }
@@ -325,6 +350,7 @@ app.post("/upload-jjal", async (req, res) => {
       url,
       like: 0,
       hate: 0,
+      tags: tags || [],
       createdAt: new Date() // 날짜 객체로 저장
     };
     await db.collection("jjal").insertOne(newFile);
@@ -394,9 +420,21 @@ app.get("/jjals", async (req, res) => {
   const keyword = req.query.q || "";
   const page = parseInt(req.query.page) || 1;
   const pageSize = 10;
+  const safeLevel = parseInt(req.query.safe) || 0;
   const query = keyword
-    ? { title: { $regex: keyword, $options: "i" } }
+    ? {
+        $or: [
+          { title: { $regex: keyword, $options: "i" } },
+          { tags: { $regex: keyword, $options: "i" } },
+        ]
+      }
     : {};
+     if (safeLevel === 0) {// 폭력적/선정적 둘 다 제외
+    query.tags = { $nin: ["폭력적", "선정적","야스적"] };
+  } else if (safeLevel === 1) {// 폭력적 허용, 선정적 제외
+    query.tags = { $ne: "야스적" };
+  } else if (safeLevel === 2) {// 둘 다 허용 → 필터 없음
+  }
   const totalCount = await db.collection("jjal").countDocuments(query);
   const totalPages = Math.ceil(totalCount / pageSize);
   const files = await db.collection("jjal")
