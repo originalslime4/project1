@@ -49,7 +49,7 @@
           {{ userinfo.userEmail }}
         </h6>
       </div>
-      <p>내페이지</p>
+      <p @click="goto = `/profile/${encodeURIComponent(btoa(userinfo.userEmail))}`">내페이지</p>
       <p>팔로우중</p>
       <p>환경설정</p>
       <p>내가쓴글</p>
@@ -59,8 +59,9 @@
   </div>
   <div id="app">
     <router-view />
-    <!-- <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="어서오시오 젊은이"/> -->
+    <h1> </h1>
+    <img style="width:250px;height:250px;" alt="Vue logo" src="./assets/omegatrus.png">
+    <Wearedevs msg="카르마 슬라임" style="background:rgb(200,200,200);"/>
   </div>
 </template>
 
@@ -74,6 +75,7 @@ axios.defaults.withCredentials = true;
 // });
 
 import HelloWorld from './components/HelloWorld'
+import Wearedevs from './components/myhouse'
 export default {
   name: "AppPage",
   setup() {
@@ -99,7 +101,8 @@ export default {
       server:{
         "/":"여기 홈 아닌데요",
         "/jjal":Math.random() < 0.5 ? "이런짤 슬라임" : "저런짤 슬라임",
-        "/home":"카르마 슬라임"
+        "/home":"카르마 슬라임",
+        "/propil":"이것은 슬라임",
         }
     };
   },
@@ -209,9 +212,9 @@ handleScroll() {
   beforeUnmount() {
     window.removeEventListener("scroll", this.handleScroll);
   },
-  // components: {
-  //   // HelloWorld
-  // },
+  components: {
+    Wearedevs
+  },
 };
 </script>
 

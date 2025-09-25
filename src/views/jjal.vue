@@ -61,7 +61,7 @@
       <button :style="{padding: '10px 24px',fontSize: '15px',border: '5px solid '+(likeviwe ===-1?'red':'black')}" @click="like(files[indfile[0]]._id, false, false);likeviwe=(likeviwe==-1)?0:-1;;">비추천</button>
     </div>
     <div style="display: flex; align-items: center; gap: 10px;">
-      <p style="font-size: 25px;margin: 0;">
+      <p @click="goto = `/profile/${encodeURIComponent(btoa(otherinfo.userEmail))}`" style="font-size: 25px;margin: 0;">
         아티스트: {{ otherinfo.userName }}
       </p>
       <img
@@ -71,6 +71,7 @@
         style="object-fit: cover; width: 50px; height: 50px; margin: 0; border-radius: 50%;"
       />
     </div>
+    <p style="font-size:15px;">{{files[indfile[0]].tags}}</p>
     <p style="font-size:15px;">{{new Date(files[indfile[0]].createdAt).toLocaleString()}}</p>
     </div>
   </div>
@@ -147,6 +148,26 @@ createdAt:"2025-09-17T04:30:53.802+00:00"}
       if (dt.like){this.files[this.indfile[0]].like-=1;this.likeviwe=1}else
       if (dt.hate){this.files[this.indfile[0]].hate-=1;this.likeviwe=-1}
     },
+    async analyzeImage(url) {
+    try {
+      const res = await axios.post("/analyze-image", { url });
+      const safe = res.data.safe;
+      const labels = res.data.labels;
+      if (safe.adult === "LIKELY" || safe.adult === "VERY_LIKELY") {labels.push("야스적")}
+      if (safe.violence === "LIKELY" || safe.violence === "VERY_LIKELY") {labels.push("폭력적")}
+      if (safe.spoof === "LIKELY" || safe.spoof === "VERY_LIKELY") {labels.push("패러디적")}
+      if (safe.medical === "LIKELY" || safe.medical === "VERY_LIKELY") {labels.push("의학적")}
+      if (safe.racy === "LIKELY" || safe.racy === "VERY_LIKELY") {labels.push("선정적")}
+      return labels;
+    } catch (err) {
+      if (err.response?.status === 429) {
+        alert(err.response.data.error);
+      } else {
+        alert("분석 실패: " + (err.response?.data?.error || err.message));
+      }
+      return null;
+    }
+  },
     convertDriveLinkToThumbnail(originalUrl, size = 1000) {
       const match = originalUrl.match(/(?:id=|\/d\/)([a-zA-Z0-9_-]{25,})/);
       if (!match) return null;
@@ -211,20 +232,22 @@ createdAt:"2025-09-17T04:30:53.802+00:00"}
         30
       );
       if (!canUpload) {
-        this.stat = "업로드";
         return;
       }
       const fileUrl = await this.filetourl(); // 먼저 업로드 수행
       if (!fileUrl) return; // 업로드 실패 시 중단
+      const sres = await this.analyzeImage(fileUrl);
+      if (!sres) return;
       const payload = {
         title: this.title,
         email: this.userinfo.userEmail,
         url: fileUrl,
+        tags: sres,
       };
       try {
         await axios.post("/upload-jjal", payload);
         alert("짤 업로드 성공");
-        this.getFiles(); // 목록 갱신
+        this.getFiles();
       } catch (err) {
         alert("DB 저장 실패: " + (err.response?.data?.error || err.message));
       }
@@ -242,6 +265,7 @@ createdAt:"2025-09-17T04:30:53.802+00:00"}
         params: {
           page: this.serchinfo.currentPage,
           q: this.serchinfo.searchKeyword,
+          safe:0
         },
       });
       this.files = res.data.files;
