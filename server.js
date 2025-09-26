@@ -44,7 +44,9 @@ app.use((req, res, next) => {
 
 // 최상단
 const monclient = new MongoClient(process.env.MONGO_URI);
-const visclient = new vision.ImageAnnotatorClient();
+const visclient = new vision.ImageAnnotatorClient({
+  keyFilename: "/project1-471223-974314382751.json"
+});
 let db;
 
 async function startServer() {
