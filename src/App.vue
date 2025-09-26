@@ -29,7 +29,7 @@
       <p>개발게임</p>
       <p>게시판</p>
       <p @click="goto = '/jjal'">짤방</p>
-      <p>채팅</p>
+      <p @click="goto = `/propil/${discode('original.slime4@gmail.com',true)}`">채팅</p>
     </div>
     <div class="menu2" :class="{ 'clmu': !pril }">
       <div style="padding: 10px">
@@ -49,7 +49,7 @@
           {{ userinfo.userEmail }}
         </h6>
       </div>
-      <p @click="goto = `/profile/${encodeURIComponent(btoa(userinfo.userEmail))}`">내페이지</p>
+      <p @click="goto = `/propil/${discode(userinfo.userEmail,true)}`">내페이지</p>
       <p>팔로우중</p>
       <p>환경설정</p>
       <p>내가쓴글</p>
@@ -102,7 +102,7 @@ export default {
         "/":"여기 홈 아닌데요",
         "/jjal":Math.random() < 0.5 ? "이런짤 슬라임" : "저런짤 슬라임",
         "/home":"카르마 슬라임",
-        "/propil":"이것은 슬라임",
+        "/propil":"엄...님아?",
         }
     };
   },
@@ -114,6 +114,13 @@ export default {
   //     const fileId = match[1];
   //     return `https://drive.google.com/thumbnail?id=${fileId}&sz=w${size}`;
   //   },
+discode(str, encode) {
+      if (encode) {
+        return btoa(unescape(encodeURIComponent(str)))
+      } else {
+        return decodeURIComponent(escape(atob(str)))
+      }
+    },
     handleImageError(e, t) {
       if (t == "img") {
         e.target.src = require("./assets/non.png"); // 또는 절대 경로
@@ -195,15 +202,17 @@ handleScroll() {
       console.log("라우트 변경됨:", from.path, "→", to.path);
       if (to.path in this.server){
         this.mainname=this.server[to.path]
-      }else{
-        this.mainname="꺄아악 어딜보는거에욧!";
+      }
+    else if (to.matched.some(r => r.path === '/propil/:userid')) {
+      this.mainname = "이것은 슬라임"
+    }else{
+      this.mainname="꺄아악 어딜보는거에욧!";
       }
     },
     goto(newVal) {
       this.$router.push(newVal);
     },
   },
-
   mounted() {
     this.checkLogin();
     this.getFollowData();

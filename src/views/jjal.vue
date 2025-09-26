@@ -61,7 +61,7 @@
       <button :style="{padding: '10px 24px',fontSize: '15px',border: '5px solid '+(likeviwe ===-1?'red':'black')}" @click="like(files[indfile[0]]._id, false, false);likeviwe=(likeviwe==-1)?0:-1;;">비추천</button>
     </div>
     <div style="display: flex; align-items: center; gap: 10px;">
-      <p @click="goto = `/profile/${encodeURIComponent(btoa(otherinfo.userEmail))}`" style="font-size: 25px;margin: 0;">
+      <p @click="goto = `/propil/${discode(otherinfo.userEmail,true)}`" style="font-size: 25px;margin: 0;">
         아티스트: {{ otherinfo.userName }}
       </p>
       <img
@@ -140,6 +140,13 @@ createdAt:"2025-09-17T04:30:53.802+00:00"}
     };
   },
   methods: {
+    discode(str, encode) {
+      if (encode) {
+        return btoa(unescape(encodeURIComponent(str)))
+      } else {
+        return decodeURIComponent(escape(atob(str)))
+      }
+    },
     async openui(){
       this.indfile[1]=true
       this.likeviwe=0
