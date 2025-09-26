@@ -3,24 +3,15 @@
   <p>암호화:{{encoded}} 해석:{{decoded}}</p>
 </template>
 
-<script setup>
+<script>
 import axios from "axios";
-import { watch } from 'vue'
-import { useRoute } from 'vue-router'
 axios.defaults.baseURL = "https://kmslime.kr";
 axios.defaults.withCredentials = true;
 // const api = axios.create({
 //   baseURL: "/",
 //   withCredentials: true
 // });
-const route = useRoute()
-const encoded = route.params.userid
-const decoded = atob(decodeURIComponent(encoded))   // "original.slime4@gmail.com"
 //import HelloWorld from '../components/HelloWorld'
-watch(() => route.params.userid, (newId, oldId) => {
-  console.log("userid 변경:", oldId, "→", newId)
-  // 여기서 새 데이터 불러오기
-})
 export default {
   name: "propilPage",
   setup() {
@@ -28,7 +19,8 @@ export default {
   },
   data() {
     return {
-
+      encoded: this.$route.params.userid,
+      decoded: atob(decodeURIComponent(this.$route.params.userid))
     }
   },
   methods: {
@@ -36,6 +28,11 @@ export default {
   },
   mounted() {
     
+  },
+  watch: {
+    '$route.params.userid'(newId, oldId) {
+      console.log("userid 변경:", oldId, "→", newId)
+    }
   },
 };
 </script>
