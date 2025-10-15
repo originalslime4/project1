@@ -45,7 +45,7 @@ app.use((req, res, next) => {
 // 최상단
 const monclient = new MongoClient(process.env.MONGO_URI);
 const visclient = new vision.ImageAnnotatorClient({
-  keyFilename: "/project1-471223-974314382751.json"
+  keyFilename: "./project1-471223-974314382751.json"
 });
 let db;
 
@@ -136,7 +136,9 @@ app.get("/userdata", async (req, res) => {
       picture: user.picture,
       nickname: user.nickname,
       bio: user.bio,
-      followers: user.followers
+      followers: user.followers,
+      create:user.createdAt,
+      config:user.config
     });
   } catch (err) {
     console.error("사용자 정보 가져오기 실패:", err);
@@ -163,7 +165,8 @@ app.get("/auth/check", async (req, res) => {
         nickname: name,
         bio: "",
         createdAt: new Date(),
-        followers: 0
+        followers: 0,
+        config:{}
       };
       await usersCollection.insertOne(user);
       console.log("✅ 새 사용자 등록:", email);
@@ -177,7 +180,9 @@ app.get("/auth/check", async (req, res) => {
       picture: user.picture,
       nickname: user.nickname,
       bio: user.bio,
-      followers: user.followers
+      followers: user.followers,
+      create:user.createdAt,
+      config:user.config
     });
   } catch (err) {
     console.error("사용자 정보 가져오기 실패", err.response?.data || err);
@@ -186,14 +191,14 @@ app.get("/auth/check", async (req, res) => {
 });
 app.put("/user", async (req, res) => {
   const email = req.session.userEmail;
-  const { nickname, bio, picture } = req.body;
+  const { nickname, bio, picture, config } = req.body;
 
   if (!email) return res.status(401).json({ error: "로그인 필요" });
 
   try {
     const result = await db.collection("users").updateOne(
       { email },
-      { $set: { nickname, bio, picture } }
+      { $set: { nickname, bio, picture, config } }
     );
 
     if (result.modifiedCount === 0) {
@@ -431,7 +436,9 @@ app.get("/jjals", async (req, res) => {
         ]
       }
     : {};
-     if (safeLevel === 0) {// 폭력적/선정적 둘 다 제외
+     if (safeLevel === -1) {
+    query.tags = { $eq : "혁명적" };
+  } else if (safeLevel === 0) {// 폭력적/선정적 둘 다 제외
     query.tags = { $nin: ["폭력적", "선정적","야스적"] };
   } else if (safeLevel === 1) {// 폭력적 허용, 선정적 제외
     query.tags = { $ne: "야스적" };

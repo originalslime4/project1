@@ -3,21 +3,21 @@
   <div>
     <p>짤 하나를 올리기 위해선 최소 30분간의 공백이 필효합니다.</p>
     <input type="file" @change="onFileChange" accept="image/*,video/gif" />
-    <img scr="{{file}}" @error="handleImageError($event, 'img')" />
+    <!-- <img style="width:25px;height:25px;object-fit: contain;" :scr="file" @error="handleImageError($event, 'img')" /> -->
     <input v-model="title" placeholder="제목 (25자)" maxlength="25" />
-    <button @click="uploadFile">업로드</button>
+    <button @click="timeout(uploadFile)">업로드</button>
     <div style="margin: 20px">
       <input
         v-model="serchinfo.searchKeyword"
-        @keyup.enter="getFiles"
+        @keyup.enter="timeout(getFiles)"
         placeholder="검색어를 입력하세요"
         style="padding: 5px; width: 50%"
       />
-      <button @click="getFiles" style="margin-left: 10px">검색</button>
+      <button @click="timeout(getFiles)" style="margin-left: 10px">검색</button>
     </div>
 
     <div class="image-grid">
-      <div v-for="(item, index) in files" :key="item.id" @click="indfile[0]=index;this.getuse(item.email);openui()">
+      <div v-for="(item, index) in files" :key="item.id" @click="indfile[0]=index;this.getuse(item.email);timeout(openui)">
         <div class="imagecard">
           <img
             :src="convertDriveLinkToThumbnail(item.url)"
@@ -31,14 +31,11 @@
     </div>
   </div>
   <div class="pagination">
-    <button @click="prevPage" :disabled="serchinfo.currentPage === 1">
+    <button @click="timeout(prevPage)" :disabled="serchinfo.currentPage === 1">
       이전
     </button>
     <span>{{ serchinfo.currentPage }} / {{ serchinfo.totalPages }}</span>
-    <button
-      @click="nextPage"
-      :disabled="serchinfo.currentPage === serchinfo.totalPages"
-    >
+    <button @click="timeout(nextPage)" :disabled="serchinfo.currentPage === serchinfo.totalPages">
       다음
     </button>
   </div>
@@ -56,9 +53,9 @@
     style="position: relative;width: 100%;height: 100%;object-fit: contain;z-index: 1;"/>
     <p style="font-size:37.5px;margin: 0;border-bottom-style: outset;border-top-style: inset;">{{files[indfile[0]].title}}</p>
     <div style="display: flex; justify-content: center; align-items: center; gap: 10%;margin: 10px 0">
-      <button :style="{padding: '10px 24px',fontSize: '15px',border: '5px solid '+(likeviwe ===1?'green':'black')}" @click="like(files[indfile[0]]._id, true, false);likeviwe=(likeviwe==1)?0:1;">추천({{ files[indfile[0]].like + likeviwe }})</button>
+      <button :style="{padding: '10px 24px',fontSize: '15px',border: '5px solid '+(likeviwe ===1?'green':'black')}" @click="likebutten(true)">추천({{ files[indfile[0]].like + likeviwe }})</button>
       <h1>{{files[indfile[0]].like-files[indfile[0]].hate+likeviwe}}</h1>
-      <button :style="{padding: '10px 24px',fontSize: '15px',border: '5px solid '+(likeviwe ===-1?'red':'black')}" @click="like(files[indfile[0]]._id, false, false);likeviwe=(likeviwe==-1)?0:-1;;">비추천</button>
+      <button :style="{padding: '10px 24px',fontSize: '15px',border: '5px solid '+(likeviwe ===-1?'red':'black')}" @click="likebutten(false)">비추천</button>
     </div>
     <div style="display: flex; align-items: center; gap: 10px;">
       <p @click="goto = `/propil/${discode(otherinfo.userEmail,true)}`" style="font-size: 25px;margin: 0;">
@@ -124,17 +121,23 @@ createdAt:"2025-09-17T04:30:53.802+00:00"}
 ],
       goto: "",
       userinfo: {
-        userName: "Unknown",
-        userEmail: "abcdefg1234@gmail.com",
-        userPicture: "",
-        bio: "슬라임의 노예☆입니다",
-      },
-      otherinfo:{
         loggedIn: false,
         userName: "Unknown",
         userEmail: "abcdefg1234@gmail.com",
         userPicture: "",
         bio: "슬라임의 노예☆입니다",
+        followers: 0,
+        create:"",
+        config:{}
+      },
+      otherinfo:{
+        userName: "Unknown",
+        userEmail: "abcdefg1234@gmail.com",
+        userPicture: "",
+        bio: "슬라임의 노예☆입니다",
+        followers: 0,
+        create:"",
+        config:{}
       },
       serchinfo: { searchKeyword: "", currentPage: 1, totalPages: 1 },
     };
@@ -145,6 +148,30 @@ createdAt:"2025-09-17T04:30:53.802+00:00"}
         return btoa(unescape(encodeURIComponent(str)))
       } else {
         return decodeURIComponent(escape(atob(str)))
+      }
+    },
+    timeout(fn){
+      var dat
+      this.limbtt += 1;
+      if (HelloWorld[this.limbtt]) {alert(HelloWorld[this.limbtt]);}
+      if (this.limbtt==1){
+        dat=fn()
+      }
+      var last=this.limbtt
+      setTimeout(() => {
+      if (last==this.limbtt){this.limbtt = 0;}
+      }, Math.min(last*250+250,5000));
+      return dat
+    },
+    likebutten(ifd){
+      if (ifd){
+        const gad=this.timeout(()=>this.like(this.files[this.indfile[0]]._id, true, false));
+        if (!gad || gad.action=="cancel"){this.likeviwe=0}
+        else if (gad.action=="switch" || gad.action=="new"){this.likeviwe=1}
+      }else{
+        const gad=this.timeout(()=>this.like(this.files[this.indfile[0]]._id, false, false));
+        if (!gad || gad.action=="cancel"){this.likeviwe=0}
+        else if (gad.action=="switch" || gad.action=="new"){this.likeviwe=-1}
       }
     },
     async openui(){
@@ -230,9 +257,7 @@ createdAt:"2025-09-17T04:30:53.802+00:00"}
       }
     },
     async uploadFile() {
-      this.limbtt += 1;
-      if (HelloWorld[this.limbtt]) {alert(HelloWorld[this.limbtt]);}
-      if (this.limbtt==1){
+      //tmo
       const canUpload = await this.checkUploadPermission(
         "jjal",
         this.userinfo.userEmail,
@@ -254,20 +279,13 @@ createdAt:"2025-09-17T04:30:53.802+00:00"}
       try {
         await axios.post("/upload-jjal", payload);
         alert("짤 업로드 성공");
-        this.getFiles();
+        this.timeout(this.getFiles);
       } catch (err) {
         alert("DB 저장 실패: " + (err.response?.data?.error || err.message));
       }
-      }
-      var last=this.limbtt
-      setTimeout(() => {
-      if (last==this.limbtt){this.limbtt = 0;}
-      }, Math.min(last*250+250,5000));
     },
     async getFiles() {
-      this.limbtt += 1;
-      if (HelloWorld[this.limbtt]) {alert(HelloWorld[this.limbtt]);}
-      if (this.limbtt==1){
+      //tmo
       const res = await axios.get("/jjals", {
         params: {
           page: this.serchinfo.currentPage,
@@ -277,11 +295,6 @@ createdAt:"2025-09-17T04:30:53.802+00:00"}
       });
       this.files = res.data.files;
       this.serchinfo.totalPages = res.data.totalPages;
-      }
-      var last=this.limbtt
-      setTimeout(() => {
-      if (last==this.limbtt){this.limbtt = 0;}
-      }, Math.min(last*250+250,5000));
     },
     async checkLogin() {
       try {
@@ -294,6 +307,9 @@ createdAt:"2025-09-17T04:30:53.802+00:00"}
           this.userinfo.userPicture = res.data.picture;
           this.userinfo.userName = res.data.nickname;
           this.userinfo.bio = res.data.bio;
+          this.userinfo.create=res.data.create;
+          this.userinfo.followers=res.data.followers;
+          this.userinfo.config=res.data.config
         }
       } catch (err) {
         console.error("로그인 확인 실패:", err);
@@ -302,35 +318,24 @@ createdAt:"2025-09-17T04:30:53.802+00:00"}
         this.userinfo.userPicture = "";
         this.userinfo.userName = "";
         this.userinfo.bio = "";
+        this.userinfo.create="";
+        this.userinfo.followers=0;
+        this.userinfo.config={};
       }
     },
     prevPage() {
-      this.limbtt += 1;
-      if (HelloWorld[this.limbtt]) {alert(HelloWorld[this.limbtt]);}
-      if (this.limbtt==1){
+      //tmo
       if (this.serchinfo.currentPage > 1) {
         this.serchinfo.currentPage--;
-        this.getFiles();
+        this.timeout(this.getFiles());
       }
-      }
-      var last=this.limbtt
-      setTimeout(() => {
-      if (last==this.limbtt){this.limbtt = 0;}
-      }, Math.min(last*250+250,5000));
     },
     nextPage() {
-      this.limbtt += 1;
-      if (HelloWorld[this.limbtt]) {alert(HelloWorld[this.limbtt]);}
-      if (this.limbtt==1){
+      //tmo
       if (this.serchinfo.currentPage < this.serchinfo.totalPages) {
         this.serchinfo.currentPage++;
-        this.getFiles();
+        this.timeout(this.getFiles());
       }
-      }
-      var last=this.limbtt
-      setTimeout(() => {
-      if (last==this.limbtt){this.limbtt = 0;}
-      }, Math.min(last*250+250,5000));
     },
     async getuse(iml) {
   try {
@@ -342,6 +347,9 @@ createdAt:"2025-09-17T04:30:53.802+00:00"}
     this.otherinfo.userPicture = res.data.picture;
     this.otherinfo.userName = res.data.nickname;
     this.otherinfo.bio = res.data.bio;
+    this.userinfo.create=res.data.create;
+    this.userinfo.followers=res.data.followers;
+    this.otherinfo.config=res.data.config;
     console.log("사용자 정보:", this.otherinfo);
   } catch (err) {
     console.error("사용자 정보 가져오기 실패:", err);
@@ -349,9 +357,7 @@ createdAt:"2025-09-17T04:30:53.802+00:00"}
   }
 },
 async like(id, islike, mod) {
-  this.limbtt += 1;
-      if (HelloWorld[this.limbtt]) {alert(HelloWorld[this.limbtt]);}
-      if (this.limbtt==1){
+  //tmo
   const payload = { id, islike, mod };
   try {
     const res = await axios.post("/jjallike", payload, { withCredentials: true });
@@ -360,11 +366,6 @@ async like(id, islike, mod) {
     alert("에러: " + (err.response?.data?.error || err.message));
     return null;
   }
-  }
-      var last=this.limbtt
-      setTimeout(() => {
-      if (last==this.limbtt){this.limbtt = 0;}
-      }, Math.min(last*250+250,5000));
 }
   },
   watch: {
@@ -431,9 +432,9 @@ async like(id, islike, mod) {
 // git add .
 // git commit -m "버그"
 // git push origin main 
-// async updateUserInfo(nickname, bio, picture) {
+// async updateUserInfo(nickname, bio, picture, config) {
 //     try {
-//       const res = await axios.put("/user", { nickname, bio, picture });
+//       const res = await axios.put("/user", { nickname, bio, picture, config });
 //       return res.data.success;
 //     } catch (err) {
 //       console.error("사용자 정보 수정 실패:", err);
