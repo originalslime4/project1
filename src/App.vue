@@ -27,7 +27,7 @@
     <div class="menu" :class="{ 'clmu': !menu }">
       <p @click="goto = '/home'">홈</p>
       <p>개발게임</p>
-      <p>게시판</p>
+      <p @click="goto = `/propil/${discode('original.slime5@gmail.com',true)}`">게시판</p>
       <p @click="goto = '/jjal'">짤방</p>
       <p @click="goto = `/propil/${discode('original.slime4@gmail.com',true)}`">채팅</p>
     </div>
@@ -59,7 +59,7 @@
   </div>
   <div id="app">
     <router-view />
-    <h1> </h1>
+    <h1>{{}}</h1>
     <img style="width:250px;height:250px;" alt="Vue logo" src="./assets/omegatrus.png">
     <Wearedevs msg="카르마 슬라임" style="background:rgb(200,200,200);"/>
   </div>
@@ -96,6 +96,8 @@ export default {
         userPicture: "",
         bio: "슬라임의 노예☆입니다",
         followers: 0,
+        create:"",
+        config:{}
       },
       following: [],
       server:{
@@ -146,14 +148,16 @@ handleScroll() {
     async logout() {
       try {
         await axios.get("/logout");
-        this.userinfo = {
-          loggedIn: false,
-          userName: "Unknown",
-          userEmail: "abcdefg1234@gmail.com",
-          userPicture: "",
-          bio: "슬라임의 노예☆입니다",
-          followers: 0,
-        };
+        this.userinfo= {
+        loggedIn:false,
+        userName: "Unknown",
+        userEmail: "abcdefg1234@gmail.com",
+        userPicture: "",
+        bio: "슬라임의 노예☆입니다",
+        followers: 0,
+        create:"",
+        config:{}
+      };
         this.following = [];
         alert("로그아웃 되었습니다.");
         //this.$router.push("/home");
@@ -172,6 +176,9 @@ handleScroll() {
           this.userinfo.userPicture = res.data.picture;
           this.userinfo.userName = res.data.nickname;
           this.userinfo.bio = res.data.bio;
+          this.userinfo.create=res.data.create;
+          this.userinfo.followers=res.data.followers;
+          this.userinfo.config=res.data.config
         }
       } catch (err) {
         console.error("로그인 확인 실패:", err);
@@ -180,6 +187,9 @@ handleScroll() {
         this.userinfo.userPicture = "";
         this.userinfo.userName = "";
         this.userinfo.bio = "";
+        this.userinfo.create="";
+        this.userinfo.followers=0;
+        this.userinfo.config={};
       }
     },
     loginWithGoogle() {
