@@ -11,7 +11,7 @@
     <span style="font-size:50px;">{{ otherinfo.userName }}</span>
     <div style="display: flex; align-items: center; gap: 10px;flex-wrap: wrap;border-color: rgb(200,200,200);border-bottom-style: outset;border-top-style: inset;padding:5px;">
     <span>{{otherinfo.config.showemail?otherinfo.userEmail:"이메일 비공개"}}</span>
-    <span>{{otherinfo.config.showfollow?otherinfo.followers:"팔로잉 비공개"}}</span>
+    <span>{{otherinfo.config.showfollow?"팔로잉 비공개":otherinfo.followers}}</span>
     </div>
     <span>{{ otherinfo.bio }}</span>
     <button style="padding: 10px 24px;font-size: 15px;" @click="mainbutton">{{otherinfo.userEmail === userinfo.userEmail?"프로필 설정":(following.find(item => item.following === otherinfo.userEmail)?"팔로우중":"팔로우")}}</button>
@@ -33,7 +33,7 @@
     <div style="display: flex; align-items: center; gap: 10px;flex-wrap: wrap;border-color: #000000;border-bottom-style: outset;border-top-style: inset;padding:10px;">
   <p style="width:100%;margin: 0;">|기본설정|</p>
   <input type="checkbox" v-model="saveinfo.config.showemail" />:자신의 이메일 보여주기<div style="width:100%;margin: 0;"></div>
-  <input type="checkbox" v-model="saveinfo.config.showfollow" />:팔로잉및 생성일자 보여주기<div style="width:100%;margin: 0;"></div>
+  <input type="checkbox" v-model="saveinfo.config.showfollow" />:팔로잉및 생성일자 비공개<div style="width:100%;margin: 0;"></div>
       </div>
       <div style="display: flex; align-items: center; gap: 10px;flex-wrap: wrap;border-color: #000000;border-bottom-style: outset;border-top-style: inset;padding:10px;">
   <p style="width:100%;margin: 0;">|접근성|</p>
