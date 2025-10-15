@@ -161,11 +161,13 @@ createdAt:"2025-09-17T04:30:53.802+00:00"}
       setTimeout(() => {
       if (last==this.limbtt){this.limbtt = 0;}
       }, Math.min(last*250+250,5000));
+      console.log(dat)
       return dat
     },
     likebutten(ifd){
       if (ifd){
         const gad=this.timeout(()=>this.like(this.files[this.indfile[0]]._id, true, false));
+        console.log(gad)
         if (!gad || gad.action=="cancel"){this.likeviwe=0}
         else if (gad.action=="switch" || gad.action=="new"){this.likeviwe=1}
       }else{
@@ -361,6 +363,7 @@ async like(id, islike, mod) {
   const payload = { id, islike, mod };
   try {
     const res = await axios.post("/jjallike", payload, { withCredentials: true });
+    console.log(res.data)
     return res.data; // liked/disliked 상태 또는 success/action
   } catch (err) {
     alert("에러: " + (err.response?.data?.error || err.message));
@@ -430,7 +433,7 @@ async like(id, islike, mod) {
 }
 </style>//할일 프로필 연령제한
 // git add .
-// git commit -m "버그"
+// git commit -m "프로필"
 // git push origin main 
 // async updateUserInfo(nickname, bio, picture, config) {
 //     try {
