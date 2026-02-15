@@ -237,9 +237,6 @@ app.put("/user", async (req, res) => {
     res.status(500).json({ error: "수정 실패" });
   }
 });
-import fs from "fs";
-import path from "path";
-
 app.post("/follow/:targetEmail", async (req, res) => {
   const follower = req.session.userEmail;
   const following = req.params.targetEmail;
