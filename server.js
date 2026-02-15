@@ -7,7 +7,7 @@ import session from "express-session";
 import { fileURLToPath } from "url";
 import { google } from "googleapis";
 import dotenv from "dotenv";
-import { Console } from "console";
+import { Console, debug } from "console";
 import vision from "@google-cloud/vision";
 dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
@@ -61,34 +61,33 @@ async function saveFileToDrive(filePath, fileId) {
   });
   console.log("✅ Google Drive 저장 완료:", res.data.id);
 }
-//파일들
-oauth2Client.setCredentials(req.session.tokens);
-const drive = google.drive({ version: "v3", auth: oauth2Client });
-async function downloadFile(fileId, destPath) {
-  const dest = fs.createWriteStream(destPath);
-  const res = await drive.files.get(
-    { fileId, alt: "media" },
-    { responseType: "stream" }
-  );
-  return new Promise((resolve, reject) => {
-    res.data
-      .on("end", () => {
-        console.log("✅ 다운로드 완료:", destPath);
-        resolve();
-      })
-      .on("error", (err) => {
-        console.error("❌ 다운로드 실패:", err);
-        reject(err);
-      })
-      .pipe(dest);
-  });
-}
-await downloadFile("1VnMzqbM6LYMTeBFzlTUUUT8WwZ_UcKeo", path.join(__dirname, "jjal.js"));
-await downloadFile("1doHeqgBaHQhRIeAFn6KJkarR2EGFyDSB", path.join(__dirname, "user.js"));
-await downloadFile("1oixWdPJTjn8ngSfK5FDzA-ZtmGD9guNK", path.join(__dirname, "follow.js"));
-await downloadFile("1EO2faPd7A_bmPIPk8fiOJQCFMIst5HKB", path.join(__dirname, "like.js"));
-const jjalPath = path.join(__dirname, "jjal.js");
-const jjalData = JSON.parse(fs.readFileSync(jjalPath, "utf-8"));
+//파일들(최상단)
+// oauth2Client.setCredentials(req.session.tokens);
+// await oauth2Client.getAccessToken();
+// const drive = google.drive({ version: "v3", auth: oauth2Client });
+// async function downloadFile(fileId, destPath) {
+//   const dest = fs.createWriteStream(destPath);
+//   const res = await drive.files.get(
+//     { fileId, alt: "media" },
+//     { responseType: "stream" }
+//   );
+//   return new Promise((resolve, reject) => {
+//     res.data
+//       .on("end", () => {
+//         console.log("✅ 다운로드 완료:", destPath);
+//         resolve();
+//       })
+//       .on("error", (err) => {
+//         console.error("❌ 다운로드 실패:", err);
+//         reject(err);
+//       })
+//       .pipe(dest);
+//   });
+// }
+// await downloadFile("1VnMzqbM6LYMTeBFzlTUUUT8WwZ_UcKeo", path.join(__dirname, "jjal.js"));
+// await downloadFile("1doHeqgBaHQhRIeAFn6KJkarR2EGFyDSB", path.join(__dirname, "user.js"));
+// await downloadFile("1oixWdPJTjn8ngSfK5FDzA-ZtmGD9guNK", path.join(__dirname, "follow.js"));
+// await downloadFile("1EO2faPd7A_bmPIPk8fiOJQCFMIst5HKB", path.join(__dirname, "like.js"));
 
 // // const res = await axios.post("http://localhost:10000/analyze-image", {
 //   url: "https://example.com/test.jpg"
@@ -315,7 +314,7 @@ app.get("/following", async (req, res) => {
 app.get("/oauth2callback", async (req, res) => {
   const code = req.query.code;
   const { tokens } = await oauth2Client.getToken(code);
-  // console.log("받은 토큰:", tokens);
+  console.log("받은 토큰:", tokens);
   oauth2Client.setCredentials(tokens);
   req.session.tokens = tokens;
   req.session.save(err => {
@@ -410,6 +409,8 @@ app.post("/upload-jjal", async (req, res) => {
       tags: tags || [],
       createdAt: new Date() // 날짜 객체로 저장
     };
+    const jjalPath = path.join(__dirname, "jjal.js");
+const jjalData = JSON.parse(fs.readFileSync(jjalPath, "utf-8"));
     jjalData.push(newFile);
     fs.writeFileSync(jjalPath, JSON.stringify(jjalData, null, 2));
     await saveFileToDrive(path.join(__dirname, "jjal.js"), "1VnMzqbM6LYMTeBFzlTUUUT8WwZ_UcKeo");
