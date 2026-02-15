@@ -39,7 +39,8 @@
       다음
     </button>
   </div>
-  <div class="viwe" :class="{ 'chag': indfile[1] }" style="position: fixed;background: rgba(0, 0, 0,0.5);width:100%;height:100%;top:0;left:0;">
+  <div @click="timeout(()=>next($event))" class="viwe" :class="{ 'chag': indfile[1] }" style="position: fixed;background: rgba(0, 0, 0,0.5);width:100%;height:100%;top:0;left:0;">
+    <h3 @click="indfile[1]=false" style="position: fixed;right:10%;top:0;transform: translateX(250%);background: rgb(255, 255, 255);padding:1%;border-radius: 10px;">X</h3>
     <div style="text-align: left;margin: 0;word-break: break-all;position: fixed;width:80%;height:80%;background: rgb(200, 255, 200);left:50%;top:5%;transform: translateX(-50%);overflow-y: auto;padding: 20px;border-radius: 10px;">
       <img
     :src="convertDriveLinkToThumbnail(files[indfile[0]].url)"
@@ -71,7 +72,7 @@
     <p style="font-size:15px;">{{files[indfile[0]].tags}}</p>
     <p style="font-size:15px;">{{new Date(files[indfile[0]].createdAt).toLocaleString()}}</p>
     </div>
-  </div>
+      </div>
 </template>
 
 <script>
@@ -164,6 +165,16 @@ createdAt:"2025-09-17T04:30:53.802+00:00"}
       console.log(dat)
       return dat
     },
+    next(mc){
+      if (mc.clientX/window.innerWidth<0.5){
+        this.indfile[0]-=1
+      }else{
+        this.indfile[0]+=1
+      }
+      this.indfile[0]=Math.max(0,Math.min(this.indfile[0],this.files.length-1))
+      this.files[this.indfile[0]].email
+      if (this.indfile[1]){this.openui()}
+    },
     likebutten(ifd){
       if (ifd){
         const gad=this.timeout(()=>this.like(this.files[this.indfile[0]]._id, true, false));
@@ -189,7 +200,7 @@ createdAt:"2025-09-17T04:30:53.802+00:00"}
       const res = await axios.post("/analyze-image", { url });
       const safe = res.data.safe;
       const labels = res.data.labels;
-      if (safe.adult === "LIKELY" || safe.adult === "VERY_LIKELY") {labels.push("야스적")}
+      if (safe.adult === "LIKELY" || safe.adult === "VERY_LIKELY") {labels.push("선정적")}
       if (safe.violence === "LIKELY" || safe.violence === "VERY_LIKELY") {labels.push("폭력적")}
       if (safe.spoof === "LIKELY" || safe.spoof === "VERY_LIKELY") {labels.push("패러디적")}
       if (safe.medical === "LIKELY" || safe.medical === "VERY_LIKELY") {labels.push("의학적")}
@@ -222,10 +233,10 @@ createdAt:"2025-09-17T04:30:53.802+00:00"}
     onFileChange(e) {
       this.file = e.target.files[0];
     },
-    async checkUploadPermission(path, email, min) {
+    async checkUploadPermission(email, min) {
       try {
-        const res = await axios.get("/limittime", {
-          params: { path, email, min },
+        const res = await axios.get("/jjaltime", {
+          params: { email, min },
         });
         if (!res.data.allowed) {
           alert(`${res.data.remaining}분 후에 다시 업로드 가능`);
@@ -261,7 +272,6 @@ createdAt:"2025-09-17T04:30:53.802+00:00"}
     async uploadFile() {
       //tmo
       const canUpload = await this.checkUploadPermission(
-        "jjal",
         this.userinfo.userEmail,
         30
       );
@@ -292,7 +302,7 @@ createdAt:"2025-09-17T04:30:53.802+00:00"}
         params: {
           page: this.serchinfo.currentPage,
           q: this.serchinfo.searchKeyword,
-          safe:0
+          safe:this.userinfo.config.viwer||0
         },
       });
       this.files = res.data.files;
@@ -433,7 +443,7 @@ async like(id, islike, mod) {
 }
 </style>//할일 프로필 연령제한
 // git add .
-// git commit -m "프로필"
+// git commit -m "버그"
 // git push origin main 
 // async updateUserInfo(nickname, bio, picture, config) {
 //     try {

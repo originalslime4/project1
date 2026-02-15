@@ -7,8 +7,6 @@ import session from "express-session";
 import { fileURLToPath } from "url";
 import { google } from "googleapis";
 import dotenv from "dotenv";
-import { MongoClient, ObjectId } from "mongodb";
-import MongoStore from "connect-mongo";
 import { Console } from "console";
 import vision from "@google-cloud/vision";
 dotenv.config();
@@ -21,11 +19,6 @@ app.use(session({
   secret: "tmffkdlavmfhwprxm",
   resave: false,
   saveUninitialized: false,
-  store: MongoStore.create({
-    mongoUrl: process.env.MONGO_URI,
-    dbName: "project1",
-    collectionName: "sessions"
-  }),
   cookie: {
     secure: true,
     sameSite: "None"
@@ -36,41 +29,66 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
-
 app.use((req, res, next) => {
-  // console.log("세션 객체:", req.session);
+  console.log("세션 객체:", req.session);
   next();
 });
-
-// 최상단
-const monclient = new MongoClient(process.env.MONGO_URI);
-const visclient = new vision.ImageAnnotatorClient({
-  keyFilename: "./project1-471223-974314382751.json"
-});
-let db;
-
 async function startServer() {
   try {
-    await monclient.connect();
-    db = monclient.db("project1");
-    console.log("✅ MongoDB 연결 성공");
     app.listen(PORT, () => {
       console.log(`✅ Server running on port ${PORT}`);
     });
   } catch (err) {
-    console.error("❌ MongoDB 연결 실패:", err);
+    console.error("❌ 연결 실패:", err);
   }
 }
-
 startServer();
-const upload = multer({ dest: "temp/" }); // 임시 저장 폴더
-
+const upload = multer({ dest: "temp/" });
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
   process.env.GOOGLE_REDIRECT_URI
 );
-
+async function saveFileToDrive(filePath, fileId) {
+  const drive = google.drive({ version: "v3", auth: oauth2Client });
+  const media = {
+    mimeType: "application/json",
+    body: fs.createReadStream(filePath)
+  };
+  const res = await drive.files.update({
+    fileId: fileId,
+    media: media
+  });
+  console.log("✅ Google Drive 저장 완료:", res.data.id);
+}
+//파일들
+oauth2Client.setCredentials(req.session.tokens);
+const drive = google.drive({ version: "v3", auth: oauth2Client });
+async function downloadFile(fileId, destPath) {
+  const dest = fs.createWriteStream(destPath);
+  const res = await drive.files.get(
+    { fileId, alt: "media" },
+    { responseType: "stream" }
+  );
+  return new Promise((resolve, reject) => {
+    res.data
+      .on("end", () => {
+        console.log("✅ 다운로드 완료:", destPath);
+        resolve();
+      })
+      .on("error", (err) => {
+        console.error("❌ 다운로드 실패:", err);
+        reject(err);
+      })
+      .pipe(dest);
+  });
+}
+await downloadFile("1VnMzqbM6LYMTeBFzlTUUUT8WwZ_UcKeo", path.join(__dirname, "jjal.js"));
+await downloadFile("1doHeqgBaHQhRIeAFn6KJkarR2EGFyDSB", path.join(__dirname, "user.js"));
+await downloadFile("1oixWdPJTjn8ngSfK5FDzA-ZtmGD9guNK", path.join(__dirname, "follow.js"));
+await downloadFile("1EO2faPd7A_bmPIPk8fiOJQCFMIst5HKB", path.join(__dirname, "like.js"));
+const jjalPath = path.join(__dirname, "jjal.js");
+const jjalData = JSON.parse(fs.readFileSync(jjalPath, "utf-8"));
 
 // // const res = await axios.post("http://localhost:10000/analyze-image", {
 //   url: "https://example.com/test.jpg"
@@ -90,12 +108,12 @@ app.post("/analyze-image", async (req, res) => {
 
     res.json({ safe, labels });
   } catch (err) {
-  if (err.code === 429) { // Quota 초과
-    return res.status(429).json({ 
-      error: "월간 한도를 소진했으니 이번달엔 게시가 불가합니다" 
-    });
-  }
-  throw err;
+    if (err.code === 429) { // Quota 초과
+      return res.status(429).json({
+        error: "월간 한도를 소진했으니 이번달엔 게시가 불가합니다"
+      });
+    }
+    throw err;
   }
 });
 
@@ -126,7 +144,8 @@ app.get("/userdata", async (req, res) => {
     if (!email) {
       return res.status(400).json({ error: "이메일이 필요합니다." });
     }
-    const usersCollection = db.collection("users");
+    const userPath = path.join(__dirname, "user.js");
+    const usersCollection = JSON.parse(fs.readFileSync(userPath, "utf-8"));
     const user = await usersCollection.findOne({ email });
     if (!user) {
       return res.status(404).json({ error: "사용자를 찾을 수 없습니다." });
@@ -137,8 +156,8 @@ app.get("/userdata", async (req, res) => {
       nickname: user.nickname,
       bio: user.bio,
       followers: user.followers,
-      create:user.createdAt,
-      config:user.config
+      create: user.createdAt,
+      config: user.config
     });
   } catch (err) {
     console.error("사용자 정보 가져오기 실패:", err);
@@ -152,10 +171,11 @@ app.get("/auth/check", async (req, res) => {
   }
   try {
     oauth2Client.setCredentials(req.session.tokens);
-    const oauth2 = google.oauth2({ version: "v2", auth: oauth2Client });
+    const oauth2 = google.oauth2({ version: "v3", auth: oauth2Client });
     const userInfo = await oauth2.userinfo.get();
     const { email, name, picture } = userInfo.data;
-    const usersCollection = db.collection("users");
+    const userPath = path.join(__dirname, "user.js");
+    const usersCollection = JSON.parse(fs.readFileSync(userPath, "utf-8"));
     let user = await usersCollection.findOne({ email });
     if (!user) {
       // 새 사용자 등록
@@ -166,7 +186,7 @@ app.get("/auth/check", async (req, res) => {
         bio: "",
         createdAt: new Date(),
         followers: 0,
-        config:{}
+        config: {}
       };
       await usersCollection.insertOne(user);
       console.log("✅ 새 사용자 등록:", email);
@@ -181,8 +201,8 @@ app.get("/auth/check", async (req, res) => {
       nickname: user.nickname,
       bio: user.bio,
       followers: user.followers,
-      create:user.createdAt,
-      config:user.config
+      create: user.createdAt,
+      config: user.config
     });
   } catch (err) {
     console.error("사용자 정보 가져오기 실패", err.response?.data || err);
@@ -196,35 +216,51 @@ app.put("/user", async (req, res) => {
   if (!email) return res.status(401).json({ error: "로그인 필요" });
 
   try {
-    const result = await db.collection("users").updateOne(
-      { email },
-      { $set: { nickname, bio, picture, config } }
-    );
-
-    if (result.modifiedCount === 0) {
+    const userPath = path.join(__dirname, "user.js");
+    const users = JSON.parse(fs.readFileSync(userPath, "utf-8"));
+    const userIndex = users.findIndex(u => u.email === email);
+    if (userIndex === -1) {
       return res.status(404).json({ error: "사용자 없음" });
     }
-
+    users[userIndex] = {
+      ...users[userIndex],
+      nickname,
+      bio,
+      picture,
+      config
+    };
+    fs.writeFileSync(userPath, JSON.stringify(users, null, 2));
+    await saveFileToDrive(userPath, "1doHeqgBaHQhRIeAFn6KJkarR2EGFyDSB");
     res.json({ success: true });
   } catch (err) {
     console.error("사용자 정보 수정 실패:", err);
     res.status(500).json({ error: "수정 실패" });
   }
 });
+import fs from "fs";
+import path from "path";
+
 app.post("/follow/:targetEmail", async (req, res) => {
   const follower = req.session.userEmail;
   const following = req.params.targetEmail;
-
   if (!follower) return res.status(401).json({ error: "로그인 필요" });
   if (follower === following) return res.status(400).json({ error: "자기 자신은 팔로우할 수 없음" });
-
   try {
-    const exists = await db.collection("follows").findOne({ follower, following });
+    const followPath = path.join(__dirname, "follow.js");
+    const follows = JSON.parse(fs.readFileSync(followPath, "utf-8"));
+    const exists = follows.find(f => f.follower === follower && f.following === following);
     if (exists) return res.status(400).json({ error: "이미 팔로우 중" });
-
-    await db.collection("follows").insertOne({ follower, following, followedAt: new Date() });
-    await db.collection("users").updateOne({ email: following }, { $inc: { followers: 1 } });
-
+    follows.push({ follower, following, followedAt: new Date() });
+    fs.writeFileSync(followPath, JSON.stringify(follows, null, 2));
+    await saveFileToDrive(followPath, "1oixWdPJTjn8ngSfK5FDzA-ZtmGD9guNK");
+    const userPath = path.join(__dirname, "user.js");
+    const users = JSON.parse(fs.readFileSync(userPath, "utf-8"));
+    const idx = users.findIndex(u => u.email === following);
+    if (idx !== -1) {
+      users[idx].followers = (users[idx].followers || 0) + 1;
+      fs.writeFileSync(userPath, JSON.stringify(users, null, 2));
+      await saveFileToDrive(userPath, "1doHeqgBaHQhRIeAFn6KJkarR2EGFyDSB");
+    }
     res.json({ success: true });
   } catch (err) {
     console.error("팔로우 실패:", err);
@@ -238,11 +274,23 @@ app.delete("/follow/:targetEmail", async (req, res) => {
   if (!follower) return res.status(401).json({ error: "로그인 필요" });
 
   try {
-    const result = await db.collection("follows").deleteOne({ follower, following });
-    if (result.deletedCount === 0) return res.status(404).json({ error: "팔로우 관계 없음" });
-
-    await db.collection("users").updateOne({ email: following }, { $inc: { followers: -1 } });
-
+    const followPath = path.join(__dirname, "follow.js");
+    let follows = JSON.parse(fs.readFileSync(followPath, "utf-8"));
+    const beforeCount = follows.length;
+    follows = follows.filter(f => !(f.follower === follower && f.following === following));
+    if (follows.length === beforeCount) {
+      return res.status(404).json({ error: "팔로우 관계 없음" });
+    }
+    fs.writeFileSync(followPath, JSON.stringify(follows, null, 2));
+    await saveFileToDrive(followPath, "1oixWdPJTjn8ngSfK5FDzA-ZtmGD9guNK");
+    const userPath = path.join(__dirname, "user.js");
+    const users = JSON.parse(fs.readFileSync(userPath, "utf-8"));
+    const idx = users.findIndex(u => u.email === following);
+    if (idx !== -1) {
+      users[idx].followers = Math.max((users[idx].followers || 0) - 1, 0);
+      fs.writeFileSync(userPath, JSON.stringify(users, null, 2));
+      await saveFileToDrive(userPath, "1doHeqgBaHQhRIeAFn6KJkarR2EGFyDSB");
+    }
     res.json({ success: true });
   } catch (err) {
     console.error("언팔로우 실패:", err);
@@ -250,20 +298,21 @@ app.delete("/follow/:targetEmail", async (req, res) => {
   }
 });
 
-
 app.get("/following", async (req, res) => {
   const email = req.session.userEmail;
   if (!email) return res.status(401).json({ error: "로그인 필요" });
-
   try {
-    const follows = await db.collection("follows").find({ follower: email }).toArray();
-    res.json(follows.map(f => f.following));
+    const followPath = path.join(__dirname, "follow.js");
+    const follows = JSON.parse(fs.readFileSync(followPath, "utf-8"));
+    const followingList = follows
+      .filter(f => f.follower === email)
+      .map(f => f.following);
+    res.json(followingList);
   } catch (err) {
     console.error("팔로잉 목록 조회 실패:", err);
     res.status(500).json({ error: "조회 실패" });
   }
 });
-
 
 // 인증 코드 처리
 app.get("/oauth2callback", async (req, res) => {
@@ -319,23 +368,26 @@ app.post("/upload-file-drive", upload.single("file"), async (req, res) => {
     fs.unlinkSync(filePath); // 임시 파일 삭제
   }
 });
-app.get("/limittime", async (req, res) => {
-  const { path, email, min } = req.query;
-  if (!path || !email || !min) {
+app.get("/jjaltime", async (req, res) => {
+  const { email, min } = req.query;
+  if (!email || !min) {
     return res.status(400).json({ error: "필수 파라미터 누락" });
   }
   try {
-    const recent = await db.collection(path)
-      .find({ email })
-      .sort({ createdAt: -1 })
-      .limit(1)
-      .toArray();
-    if (recent.length > 0) {
-      const lastCreated = new Date(recent[0].createdAt);
+    const jjalPath = path.join(__dirname, "jjal.js");
+    const jjals = JSON.parse(fs.readFileSync(jjalPath, "utf-8"));
+    const recent = jjals
+      .filter(j => j.email === email)
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+    if (recent) {
+      const lastCreated = new Date(recent.createdAt);
       const now = new Date();
       const diffMinutes = (now - lastCreated) / (1000 * 60);
       if (diffMinutes < parseInt(min)) {
-        return res.json({ allowed: false, remaining: Math.ceil(min - diffMinutes) });
+        return res.json({
+          allowed: false,
+          remaining: Math.ceil(min - diffMinutes)
+        });
       }
     }
     return res.json({ allowed: true });
@@ -352,6 +404,7 @@ app.post("/upload-jjal", async (req, res) => {
   }
   try {
     const newFile = {
+      _id: uuidv4(),
       title,
       email,
       url,
@@ -360,22 +413,29 @@ app.post("/upload-jjal", async (req, res) => {
       tags: tags || [],
       createdAt: new Date() // 날짜 객체로 저장
     };
-    await db.collection("jjal").insertOne(newFile);
+    jjalData.push(newFile);
+    fs.writeFileSync(jjalPath, JSON.stringify(jjalData, null, 2));
+    await saveFileToDrive(path.join(__dirname, "jjal.js"), "1VnMzqbM6LYMTeBFzlTUUUT8WwZ_UcKeo");
     res.json({ success: true });
   } catch (err) {
-    console.error("DB 저장 실패", err);
-    res.status(500).json({ error: "DB 저장 실패" });
+    console.error("저장 실패", err);
+    res.status(500).json({ error: "저장 실패" });
   }
 });
+
 app.post("/jjallike", async (req, res) => {
   const email = req.session.userEmail;
   const { id, islike, mod } = req.body;
   if (!email) return res.status(401).json({ error: "로그인 필요" });
-  const jjalId = new ObjectId(id);
-  const likesCollection = db.collection("likes");
-  const jjalsCollection = db.collection("jjal");
   try {
-    const existing = await likesCollection.findOne({ jjalId, email });
+    const likePath = path.join(__dirname, "like.js");
+    const jjalPath = path.join(__dirname, "jjal.js");
+    let likes = JSON.parse(fs.readFileSync(likePath, "utf-8"));
+    let jjals = JSON.parse(fs.readFileSync(jjalPath, "utf-8"));
+    const jjalIndex = jjals.findIndex(j => j._id === id);
+    if (jjalIndex === -1) return res.status(404).json({ error: "짤 없음" });
+    const existingIndex = likes.findIndex(l => l.jjalId === id && l.email === email);
+    const existing = existingIndex !== -1 ? likes[existingIndex] : null;
     if (mod) {
       return res.json({
         like: existing?.type === "like" || false,
@@ -383,79 +443,80 @@ app.post("/jjallike", async (req, res) => {
       });
     }
     if (existing?.type === (islike ? "like" : "hate")) {
-      await likesCollection.deleteOne({ _id: existing._id });
-      await jjalsCollection.updateOne(
-        { _id: jjalId },
-        { $inc: { [islike ? "like" : "hate"]: -1 } }
-      );
+      likes.splice(existingIndex, 1);
+      jjals[jjalIndex][islike ? "like" : "hate"] =
+        (jjals[jjalIndex][islike ? "like" : "hate"] || 0) - 1;
+      fs.writeFileSync(likePath, JSON.stringify(likes, null, 2));
+      fs.writeFileSync(jjalPath, JSON.stringify(jjals, null, 2));
+      await saveFileToDrive(likePath, "1EO2faPd7A_bmPIPk8fiOJQCFMIst5HKB");
+      await saveFileToDrive(jjalPath, "1VnMzqbM6LYMTeBFzlTUUUT8WwZ_UcKeo");
       return res.json({ success: true, action: "cancel" });
     }
     if (existing) {
-      await likesCollection.updateOne(
-        { _id: existing._id },
-        { $set: { type: islike ? "like" : "hate" } }
-      );
-      await jjalsCollection.updateOne(
-        { _id: jjalId },
-        {
-          $inc: {
-            [islike ? "like" : "hate"]: 1,
-            [islike ? "hate" : "like"]: -1
-          }
-        }
-      );
+      likes[existingIndex].type = islike ? "like" : "hate";
+      jjals[jjalIndex][islike ? "like" : "hate"] =
+        (jjals[jjalIndex][islike ? "like" : "hate"] || 0) + 1;
+      jjals[jjalIndex][islike ? "hate" : "like"] =
+        (jjals[jjalIndex][islike ? "hate" : "like"] || 0) - 1;
+      fs.writeFileSync(likePath, JSON.stringify(likes, null, 2));
+      fs.writeFileSync(jjalPath, JSON.stringify(jjals, null, 2));
+      await saveFileToDrive(likePath, "1EO2faPd7A_bmPIPk8fiOJQCFMIst5HKB");
+      await saveFileToDrive(jjalPath, "1VnMzqbM6LYMTeBFzlTUUUT8WwZ_UcKeo");
       return res.json({ success: true, action: "switch" });
     }
-    await likesCollection.insertOne({
-      jjalId,
+    likes.push({
+      jjalId: id,
       email,
       type: islike ? "like" : "hate",
       createdAt: new Date()
     });
-    await jjalsCollection.updateOne(
-      { _id: jjalId },
-      { $inc: { [islike ? "like" : "hate"]: 1 } }
-    );
+    jjals[jjalIndex][islike ? "like" : "hate"] =
+      (jjals[jjalIndex][islike ? "like" : "hate"] || 0) + 1;
+    fs.writeFileSync(likePath, JSON.stringify(likes, null, 2));
+    fs.writeFileSync(jjalPath, JSON.stringify(jjals, null, 2));
+    await saveFileToDrive(likePath, "1EO2faPd7A_bmPIPk8fiOJQCFMIst5HKB");
+    await saveFileToDrive(jjalPath, "1VnMzqbM6LYMTeBFzlTUUUT8WwZ_UcKeo");
     return res.json({ success: true, action: "new" });
   } catch (err) {
     console.error("추천/비추천 처리 실패:", err);
     res.status(500).json({ error: "서버 오류" });
   }
 });
+
 // 목록 조회 API
 app.get("/jjals", async (req, res) => {
   const keyword = req.query.q || "";
   const page = parseInt(req.query.page) || 1;
   const pageSize = 10;
   const safeLevel = parseInt(req.query.safe) || 0;
-  const query = keyword
-    ? {
-        $or: [
-          { title: { $regex: keyword, $options: "i" } },
-          { tags: { $regex: keyword, $options: "i" } },
-        ]
-      }
-    : {};
-     if (safeLevel === -1) {
-    query.tags = { $eq : "혁명적" };
-  } else if (safeLevel === 0) {// 폭력적/선정적 둘 다 제외
-    query.tags = { $nin: ["폭력적", "선정적","야스적"] };
-  } else if (safeLevel === 1) {// 폭력적 허용, 선정적 제외
-    query.tags = { $ne: "야스적" };
-  } else if (safeLevel === 2) {// 둘 다 허용 → 필터 없음
+  try {
+    const jjalPath = path.join(__dirname, "jjal.js");
+    const jjalData = JSON.parse(fs.readFileSync(jjalPath, "utf-8"));
+    let filtered = jjalData;
+    if (keyword) {
+      const regex = new RegExp(keyword, "i");
+      filtered = filtered.filter(
+        f => regex.test(f.title) || f.tags.some(tag => regex.test(tag))
+      );
+    }
+    if (safeLevel === -1) {
+      filtered = filtered.filter(f => f.tags.includes("기본"));
+    } else if (safeLevel === 0) {
+      filtered = filtered.filter(f => !f.tags.includes("폭력적") && !f.tags.includes("선정적"));
+    } else if (safeLevel === 1) {
+      filtered = filtered.filter(f => f.tags.every(tag => tag !== "선정적"));
+    } else if (safeLevel === 2) {
+      // 모든 데이터 허용
+    }
+    filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    const totalCount = filtered.length;
+    const totalPages = Math.ceil(totalCount / pageSize);
+    const files = filtered.slice((page - 1) * pageSize, page * pageSize);
+    res.json({ files, totalPages });
+  } catch (err) {
+    console.error("❌ 목록 조회 실패:", err);
+    res.status(500).json({ error: "목록 조회 실패" });
   }
-  const totalCount = await db.collection("jjal").countDocuments(query);
-  const totalPages = Math.ceil(totalCount / pageSize);
-  const files = await db.collection("jjal")
-    .find(query)
-    .sort({ createdAt: -1 })
-    .skip((page - 1) * pageSize)
-    .limit(pageSize)
-    .toArray();
-  res.json({
-    files,
-    totalPages,
-  });
 });
 
 app.use(express.static(path.join(__dirname, "dist")));

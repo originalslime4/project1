@@ -2,7 +2,7 @@
   <div class="home" :class="{ 'scrolled': isScrolled[0] }">
     <a @click="rerod">{{ mainname }}</a>
     <b>알림</b>
-    <span @click="menu = !menu">三{{ menu }}</span>
+    <span @click="menu = !menu">三</span>
     <img
       @click="
         if (this.userinfo.loggedIn) {
@@ -105,6 +105,7 @@ export default {
         "/jjal":Math.random() < 0.5 ? "이런짤 슬라임" : "저런짤 슬라임",
         "/home":"카르마 슬라임",
         "/propil":"엄...님아?",
+        "/propil/":"없는데요;;",
         }
     };
   },
