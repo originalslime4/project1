@@ -170,7 +170,7 @@ app.get("/auth/check", async (req, res) => {
   }
   try {
     oauth2Client.setCredentials(req.session.tokens);
-    const oauth2 = google.oauth2({ version: "v3", auth: oauth2Client });
+    const oauth2 = google.oauth2({ version: "v2", auth: oauth2Client });
     const userInfo = await oauth2.userinfo.get();
     const { email, name, picture } = userInfo.data;
     const userPath = path.join(__dirname, "user.js");
