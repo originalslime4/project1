@@ -125,7 +125,7 @@ app.get("/login", (req, res) => {
       "https://www.googleapis.com/auth/userinfo.email",
       "https://www.googleapis.com/auth/drive"
     ]
-
+//drive.file
   });
   res.redirect(authUrl);
 });
@@ -175,6 +175,11 @@ app.get("/auth/check", async (req, res) => {
     const userInfo = await oauth2.userinfo.get();
     const { email, name, picture } = userInfo.data;
     const userPath = path.join(__dirname, "user.js");
+    ///////////////////
+    const content = fs.readFileSync(userPath, "utf-8");
+console.log("파일 내용:", content);
+console.log("길이:", content.length);
+////////////
     const usersCollection = JSON.parse(fs.readFileSync(userPath, "utf-8"));
     let user = await usersCollection.findOne({ email });
     if (!user) {
