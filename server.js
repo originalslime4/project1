@@ -146,7 +146,7 @@ app.get("/userdata", async (req, res) => {
     }
     const userPath = path.join(__dirname, "user.js");
     const usersCollection = JSON.parse(fs.readFileSync(userPath, "utf-8"));
-    const user = await usersCollection.findOne({ email });
+    const user = usersCollection.find(u => u.email === email);
     if (!user) {
       return res.status(404).json({ error: "사용자를 찾을 수 없습니다." });
     }
@@ -175,13 +175,8 @@ app.get("/auth/check", async (req, res) => {
     const userInfo = await oauth2.userinfo.get();
     const { email, name, picture } = userInfo.data;
     const userPath = path.join(__dirname, "user.js");
-    ///////////////////
-    const content = fs.readFileSync(userPath, "utf-8");
-console.log("파일 내용:", content);
-console.log("길이:", content.length);
-////////////
     const usersCollection = JSON.parse(fs.readFileSync(userPath, "utf-8"));
-    let user = await usersCollection.findOne({ email });
+    const user = usersCollection.find(u => u.email === email);
     if (!user) {
       // 새 사용자 등록
       user = {
