@@ -101,6 +101,7 @@ await downloadFile("1EO2faPd7A_bmPIPk8fiOJQCFMIst5HKB", path.join(__dirname, "li
 
 app.post("/analyze-image", async (req, res) => {
   try {
+    console.log("start")
     const { url } = req.body;
 
     // SafeSearch (유해 이미지 감지)
@@ -109,7 +110,7 @@ app.post("/analyze-image", async (req, res) => {
     // 라벨 태깅
     const [labelResult] = await visclient.labelDetection(url);
     const labels = labelResult.labelAnnotations.map(l => l.description);
-
+    console.log({ safe, labels });
     res.json({ safe, labels });
   } catch (err) {
     if (err.code === 429) { // Quota 초과
