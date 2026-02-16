@@ -98,6 +98,15 @@ await downloadFile("1EO2faPd7A_bmPIPk8fiOJQCFMIst5HKB", path.join(__dirname, "li
 //   url: "https://example.com/test.jpg"
 // });
 // console.log(res.data);
+async function test(url) {
+  const [safeResult] = await visclient.safeSearchDetection(url);
+    const safe = safeResult.safeSearchAnnotation;
+    const [labelResult] = await visclient.labelDetection(url);
+    const labels = labelResult.labelAnnotations.map(l => l.description);
+    console.log({ safe, labels });
+}
+await test("https://drive.google.com/uc?id=1omN2Z06phX6h3bggAi2vMbb7UzJNenna")
+await test("https://i.ytimg.com/vi/QsdPzH0dSp0/maxresdefault.jpg")
 
 app.post("/analyze-image", async (req, res) => {
   try {
