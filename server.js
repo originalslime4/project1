@@ -103,11 +103,9 @@ app.post("/analyze-image", async (req, res) => {
   try {
     console.log("start")
     const { url } = req.body;
-
-    // SafeSearch (유해 이미지 감지)
+    console.log(url)
     const [safeResult] = await visclient.safeSearchDetection(url);
     const safe = safeResult.safeSearchAnnotation;
-    // 라벨 태깅
     const [labelResult] = await visclient.labelDetection(url);
     const labels = labelResult.labelAnnotations.map(l => l.description);
     console.log({ safe, labels });
