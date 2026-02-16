@@ -62,7 +62,7 @@ async function saveFileToDrive(filePath, fileId) {
   console.log("✅ Google Drive 저장 완료:", res.data.id);
 }
 const visclient = new vision.ImageAnnotatorClient({
-  keyFilename: 'project1-471223-974314382751.json' // 서비스 계정 키 파일 경로
+  credentials: JSON.parse(process.env.GOOGLE_CLOUD_KEY)
 });
 //파일들
 oauth2Client.setCredentials({
