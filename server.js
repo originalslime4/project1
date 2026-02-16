@@ -98,10 +98,12 @@ await downloadFile("1EO2faPd7A_bmPIPk8fiOJQCFMIst5HKB", path.join(__dirname, "li
 //   url: "https://example.com/test.jpg"
 // });
 // console.log(res.data);
-async function test(url) {
-  const [safeResult] = await visclient.safeSearchDetection(url);
+async function test(driveUrl) {
+    const response = await axios.get(driveUrl, { responseType: "arraybuffer" });
+  const buffer = Buffer.from(response.data, "binary");
+  const [safeResult] = await visclient.safeSearchDetection({ image: { content: buffer } });
+  const [labelResult] = await visclient.labelDetection({ image: { content: buffer } });
     const safe = safeResult.safeSearchAnnotation;
-    const [labelResult] = await visclient.labelDetection(url);
     const labels = labelResult.labelAnnotations.map(l => l.description);
     console.log({ safe, labels });
 }
