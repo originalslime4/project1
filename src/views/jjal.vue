@@ -43,36 +43,38 @@
     <h3 @click="indfile[1]=false" style="position: fixed;right:10%;top:0;transform: translateX(250%);background: rgb(255, 255, 255);padding:1%;border-radius: 10px;">X</h3>
     <div style="text-align: left;margin: 0;word-break: break-all;position: fixed;width:80%;height:80%;background: rgb(200, 255, 200);left:50%;top:5%;transform: translateX(-50%);overflow-y: auto;padding: 20px;border-radius: 10px;">
       <img
-    :src="convertDriveLinkToThumbnail(files[indfile[0]].url)"
-    alt="슬라임 이미지"
-    @error="handleImageError($event, 'img')"
-    style="position: absolute;width: 95%;height: 95%;object-fit: cover;filter: blur(50px);z-index: 0;"/>
-  <img
-    :src="convertDriveLinkToThumbnail(files[indfile[0]].url)"
-    alt="슬라임 이미지"
-    @error="handleImageError($event, 'img')"
-    style="position: relative;width: 100%;height: 100%;object-fit: contain;z-index: 1;"/>
-    <p style="font-size:37.5px;margin: 0;border-bottom-style: outset;border-top-style: inset;">{{files[indfile[0]].title}}</p>
-    <div style="display: flex; justify-content: center; align-items: center; gap: 10%;margin: 10px 0">
-      <button :style="{padding: '10px 24px',fontSize: '15px',border: '5px solid '+(likeviwe ===1?'green':'black')}" @click="likebutten(true)">추천({{ files[indfile[0]].like + likeviwe }})</button>
-      <h1>{{files[indfile[0]].like-files[indfile[0]].hate+likeviwe}}</h1>
-      <button :style="{padding: '10px 24px',fontSize: '15px',border: '5px solid '+(likeviwe ===-1?'red':'black')}" @click="likebutten(false)">비추천</button>
-    </div>
-    <div style="display: flex; align-items: center; gap: 10px;">
-      <p @click="goto = `/propil/${discode(otherinfo.userEmail,true)}`" style="font-size: 25px;margin: 0;">
-        아티스트: {{ otherinfo.userName }}
-      </p>
+        v-if="files.length > 0 && files[indfile[0]]"
+        :src="convertDriveLinkToThumbnail(files[indfile[0]].url)"
+        alt="슬라임 이미지"
+        @error="handleImageError($event, 'img')"
+        style="position: absolute;width: 95%;height: 95%;object-fit: cover;filter: blur(50px);z-index: 0;"/>
       <img
-        :src="otherinfo.userPicture"
-        class="propil"
-        @error="handleImageError($event, 'prl')"
-        style="object-fit: cover; width: 50px; height: 50px; margin: 0; border-radius: 50%;"
-      />
-    </div>
-    <p style="font-size:15px;">{{files[indfile[0]].tags}}</p>
-    <p style="font-size:15px;">{{new Date(files[indfile[0]].createdAt).toLocaleString()}}</p>
-    </div>
+        v-if="files.length > 0 && files[indfile[0]]"
+        :src="convertDriveLinkToThumbnail(files[indfile[0]].url)"
+        alt="슬라임 이미지"
+        @error="handleImageError($event, 'img')"
+        style="position: relative;width: 100%;height: 100%;object-fit: contain;z-index: 1;"/>
+      <p style="font-size:37.5px;margin: 0;border-bottom-style: outset;border-top-style: inset;">{{files[indfile[0]].title}}</p>
+      <div style="display: flex; justify-content: center; align-items: center; gap: 10%;margin: 10px 0">
+        <button :style="{padding: '10px 24px',fontSize: '15px',border: '5px solid '+(likeviwe ===1?'green':'black')}" @click="likebutten(true)">추천({{ files[indfile[0]].like + likeviwe }})</button>
+        <h1>{{files[indfile[0]].like-files[indfile[0]].hate+likeviwe}}</h1>
+        <button :style="{padding: '10px 24px',fontSize: '15px',border: '5px solid '+(likeviwe ===-1?'red':'black')}" @click="likebutten(false)">비추천</button>
       </div>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <p @click="goto = `/propil/${discode(otherinfo.userEmail,true)}`" style="font-size: 25px;margin: 0;">
+          아티스트: {{ otherinfo.userName }}
+        </p>
+        <img
+          :src="otherinfo.userPicture"
+          class="propil"
+         @error="handleImageError($event, 'prl')"
+         style="object-fit: cover; width: 50px; height: 50px; margin: 0; border-radius: 50%;"
+        />
+      </div>
+      <p style="font-size:15px;">{{files[indfile[0]].tags}}</p>
+      <p style="font-size:15px;">{{new Date(files[indfile[0]].createdAt).toLocaleString()}}</p>
+    </div>
+  </div>
 </template>
 
 <script>
