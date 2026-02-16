@@ -315,7 +315,7 @@ app.get("/following", async (req, res) => {
 app.get("/oauth2callback", async (req, res) => {
   const code = req.query.code;
   const { tokens } = await oauth2Client.getToken(code);
-  console.log("받은 토큰:", tokens);
+  //console.log("받은 토큰:", tokens);
   oauth2Client.setCredentials(tokens);
   req.session.tokens = tokens;
   req.session.save(err => {
