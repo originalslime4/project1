@@ -14,7 +14,7 @@ axios.defaults.withCredentials = true;
 
 //import HelloWorld from '../components/HelloWorld'
 export default {
-  name: "jallPage",
+  name: "homePage",
   setup() {
     return {};
   },
