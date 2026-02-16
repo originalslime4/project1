@@ -306,6 +306,7 @@ app.get("/following", async (req, res) => {
     const followingList = follows
       .filter(f => f.follower === email)
       .map(f => f.following);
+      console.log(followingList)
     res.json(followingList);
   } catch (err) {
     console.error("팔로잉 목록 조회 실패:", err);

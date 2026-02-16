@@ -73,8 +73,8 @@
          style="object-fit: cover; width: 50px; height: 50px; margin: 0; border-radius: 50%;"
         />
       </div>
-      <p style="font-size:15px;">{{files[indfile[0]].tags}}</p>
-      <p style="font-size:15px;">{{new Date(files[indfile[0]].createdAt).toLocaleString()}}</p>
+      <p v-if="files[indfile[0]]" style="font-size:15px;">{{files[indfile[0]].tags}}</p>
+      <p v-if="files[indfile[0]]" style="font-size:15px;">{{new Date(files[indfile[0]].createdAt).toLocaleString()}}</p>
     </div>
   </div>
 </template>
