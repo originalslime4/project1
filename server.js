@@ -330,7 +330,8 @@ app.get("/oauth2callback", async (req, res) => {
       console.error("❌ 세션 저장 실패:", err);
       return res.status(500).send("세션 저장 실패");
     }
-    console.log("✅ 세션 저장 완료:", req.session.tokens);
+    console.log("✅ 세션 저장 완료:");
+   // console.log("✅ 세션 저장 완료:", req.session.tokens);
     res.redirect("/home");
   });
 });
