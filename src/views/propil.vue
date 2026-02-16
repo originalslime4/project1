@@ -319,7 +319,7 @@ async unfollowUser(targetEmail) {
   async updateUserInfo() {
     try {
       const res = await axios.put("/user", { nickname:this.saveinfo.userName, bio:this.saveinfo.bio, picture:this.saveinfo.picture, config:this.saveinfo.config });
-      sett=false;
+      this.sett=false;
       return res.data.success;
     } catch (err) {
       console.error("사용자 정보 수정 실패:", err);
