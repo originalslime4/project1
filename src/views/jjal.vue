@@ -182,7 +182,6 @@ export default {
     likebutten(ifd){
       if (ifd){
         const gad=this.timeout(()=>this.like(this.files[this.indfile[0]]._id, true, false));
-        console.log(gad)
         if (!gad || gad.action=="cancel"){this.likeviwe=0}
         else if (gad.action=="switch" || gad.action=="new"){this.likeviwe=1}
       }else{
@@ -190,6 +189,7 @@ export default {
         if (!gad || gad.action=="cancel"){this.likeviwe=0}
         else if (gad.action=="switch" || gad.action=="new"){this.likeviwe=-1}
       }
+      print(this.likeviwe)
     },
     async openui(){
       this.indfile[1]=true
