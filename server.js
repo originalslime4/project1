@@ -176,7 +176,7 @@ app.get("/auth/check", async (req, res) => {
     const { email, name, picture } = userInfo.data;
     const userPath = path.join(__dirname, "user.js");
     const usersCollection = JSON.parse(fs.readFileSync(userPath, "utf-8"));
-    const user = usersCollection.find(u => u.email === email);
+    let user = usersCollection.find(u => u.email === email);
     if (!user) {
       // 새 사용자 등록
       user = {
