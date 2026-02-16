@@ -180,18 +180,7 @@ export default {
       if (this.indfile[1]){this.openui()}
     },
     likebutten(ifd){
-      if (ifd){
-        const gad=this.timeout(()=>this.like(this.files[this.indfile[0]]._id, true, false));
-        if (!gad || gad.action=="cancel"){this.files[this.indfile[0]].like-=1;this.likeviwe=0}
-        else if (gad.action=="switch"){this.files[this.indfile[0]].like+=2;this.likeviwe=1}
-        else if (gad.action=="new"){this.files[this.indfile[0]].like+=1;this.likeviwe=1}
-      }else{
-        const gad=this.timeout(()=>this.like(this.files[this.indfile[0]]._id, false, false));
-        if (!gad || gad.action=="cancel"){this.files[this.indfile[0]].like+=1;this.likeviwe=0}
-        else if (gad.action=="switch"){this.files[this.indfile[0]].like-=2;this.likeviwe=-1}
-        else if (gad.action=="new"){this.files[this.indfile[0]].like-=1;this.likeviwe=-1}
-      }
-      console.log(this.likeviwe)
+      this.timeout(()=>this.like(this.files[this.indfile[0]]._id, ifd, false));
     },
     async openui(){
       this.indfile[1]=true
@@ -380,6 +369,18 @@ async like(id, islike, mod) {
   try {
     const res = await axios.post("/jjallike", payload, { withCredentials: true });
     console.log(res.data)
+    if (!mod){
+      const gad=res.data;
+      if (islike){
+      if (!gad || gad.action=="cancel"){this.files[this.indfile[0]].like-=1;this.likeviwe=0}
+        else if (gad.action=="switch"){this.files[this.indfile[0]].like+=2;this.likeviwe=1}
+        else if (gad.action=="new"){this.files[this.indfile[0]].like+=1;this.likeviwe=1}
+      }else{
+        if (!gad || gad.action=="cancel"){this.files[this.indfile[0]].like+=1;this.likeviwe=0}
+        else if (gad.action=="switch"){this.files[this.indfile[0]].like-=2;this.likeviwe=-1}
+        else if (gad.action=="new"){this.files[this.indfile[0]].like-=1;this.likeviwe=-1}
+      }
+    }
     return res.data; // liked/disliked 상태 또는 success/action
   } catch (err) {
     alert("에러: " + (err.response?.data?.error || err.message));
