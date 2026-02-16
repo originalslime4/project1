@@ -10,6 +10,7 @@ import dotenv from "dotenv";
 import { Console, debug } from "console";
 import vision from "@google-cloud/vision";
 import axios from "axios";
+import { v4 as uuidv4 } from 'uuid';
 dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -31,7 +32,7 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use((req, res, next) => {
-  console.log("세션 객체:", req.session);
+  //console.log("세션 객체:", req.session);
   next();
 });
 async function startServer() {
@@ -99,21 +100,8 @@ await downloadFile("1EO2faPd7A_bmPIPk8fiOJQCFMIst5HKB", path.join(__dirname, "li
 //   url: "https://example.com/test.jpg"
 // });
 // console.log(res.data);
-async function test(driveUrl) {
-    const response = await axios.get(driveUrl, { responseType: "arraybuffer" });
-  const buffer = Buffer.from(response.data, "binary");
-  const [safeResult] = await visclient.safeSearchDetection({ image: { content: buffer } });
-  const [labelResult] = await visclient.labelDetection({ image: { content: buffer } });
-    const safe = safeResult.safeSearchAnnotation;
-    const labels = labelResult.labelAnnotations.map(l => l.description);
-    console.log({ safe, labels });
-}
-await test("https://drive.google.com/uc?id=1omN2Z06phX6h3bggAi2vMbb7UzJNenna")
-await test("https://i.ytimg.com/vi/QsdPzH0dSp0/maxresdefault.jpg")
-
 app.post("/analyze-image", async (req, res) => {
   try {
-    console.log("start")
     const { url } = req.body;
     const response = await axios.get(url, { responseType: "arraybuffer" });
   const buffer = Buffer.from(response.data, "binary");
@@ -121,7 +109,6 @@ app.post("/analyze-image", async (req, res) => {
   const [labelResult] = await visclient.labelDetection({ image: { content: buffer } });
     const safe = safeResult.safeSearchAnnotation;
     const labels = labelResult.labelAnnotations.map(l => l.description);
-    console.log({ safe, labels });
     res.json({ safe, labels });
   } catch (err) {
     if (err.code === 429) { // Quota 초과
