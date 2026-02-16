@@ -9,6 +9,7 @@ import { google } from "googleapis";
 import dotenv from "dotenv";
 import { Console, debug } from "console";
 import vision from "@google-cloud/vision";
+import axios from "axios";
 dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -114,10 +115,11 @@ app.post("/analyze-image", async (req, res) => {
   try {
     console.log("start")
     const { url } = req.body;
-    console.log(url)
-    const [safeResult] = await visclient.safeSearchDetection(url);
+    const response = await axios.get(url, { responseType: "arraybuffer" });
+  const buffer = Buffer.from(response.data, "binary");
+  const [safeResult] = await visclient.safeSearchDetection({ image: { content: buffer } });
+  const [labelResult] = await visclient.labelDetection({ image: { content: buffer } });
     const safe = safeResult.safeSearchAnnotation;
-    const [labelResult] = await visclient.labelDetection(url);
     const labels = labelResult.labelAnnotations.map(l => l.description);
     console.log({ safe, labels });
     res.json({ safe, labels });
