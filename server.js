@@ -188,7 +188,9 @@ app.get("/auth/check", async (req, res) => {
         followers: 0,
         config: {}
       };
-      await usersCollection.insertOne(user);
+      usersCollection.push(user);
+fs.writeFileSync(userPath, JSON.stringify(usersCollection, null, 2));
+await saveFileToDrive(userPath, "1doHeqgBaHQhRIeAFn6KJkarR2EGFyDSB");
       console.log("✅ 새 사용자 등록:", email);
     } else {
       console.log("🔎 기존 사용자 불러오기:", email);
