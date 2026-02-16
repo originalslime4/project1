@@ -61,6 +61,9 @@ async function saveFileToDrive(filePath, fileId) {
   });
   console.log("✅ Google Drive 저장 완료:", res.data.id);
 }
+const visclient = new vision.ImageAnnotatorClient({
+  keyFilename: 'project1-471223-974314382751.json' // 서비스 계정 키 파일 경로
+});
 //파일들
 oauth2Client.setCredentials({
   refresh_token: process.env.GOOGLE_REFRESH_TOKEN
@@ -299,6 +302,7 @@ app.delete("/follow/:targetEmail", async (req, res) => {
 
 app.get("/following", async (req, res) => {
   const email = req.session.userEmail;
+  console.log("--------------------------------------------------------");
   if (!email) return res.status(401).json({ error: "로그인 필요" });
   try {
     const followPath = path.join(__dirname, "follow.js");
@@ -306,7 +310,7 @@ app.get("/following", async (req, res) => {
     const followingList = follows
       .filter(f => f.follower === email)
       .map(f => f.following);
-      console.log(followingList)
+    console.log(followingList);
     res.json(followingList);
   } catch (err) {
     console.error("팔로잉 목록 조회 실패:", err);
