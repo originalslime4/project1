@@ -58,8 +58,8 @@
       />
       <p v-if="files[indfile[0]]" style="font-size:37.5px;margin: 0;border-bottom-style: outset;border-top-style: inset;">{{files[indfile[0]].title}}</p>
       <div style="display: flex; justify-content: center; align-items: center; gap: 10%;margin: 10px 0">
-        <button v-if="files[indfile[0]]" :style="{padding: '10px 24px',fontSize: '15px',border: '5px solid '+(likeviwe ===1?'green':'black')}" @click="likebutten(true)">추천({{ files[indfile[0]].like + likeviwe }})</button>
-        <h1 v-if="files[indfile[0]]">{{files[indfile[0]].like-files[indfile[0]].hate+likeviwe}}</h1>
+        <button v-if="files[indfile[0]]" :style="{padding: '10px 24px',fontSize: '15px',border: '5px solid '+(likeviwe ===1?'green':'black')}" @click="likebutten(true)">추천({{files[indfile[0]].like}})</button>
+        <h1 v-if="files[indfile[0]]">{{files[indfile[0]].like-files[indfile[0]].hate}}</h1>
         <button v-if="files[indfile[0]]" :style="{padding: '10px 24px',fontSize: '15px',border: '5px solid '+(likeviwe ===-1?'red':'black')}" @click="likebutten(false)">비추천</button>
       </div>
       <div style="display: flex; align-items: center; gap: 10px;">
@@ -182,13 +182,14 @@ export default {
     likebutten(ifd){
       if (ifd){
         const gad=this.timeout(()=>this.like(this.files[this.indfile[0]]._id, true, false));
-        console.log(gad)
-        if (!gad || gad.action=="cancel"){this.likeviwe=0}
-        else if (gad.action=="switch" || gad.action=="new"){this.likeviwe=1}
+        if (!gad || gad.action=="cancel"){this.files[this.indfile[0]].like-=1;this.likeviwe=0}
+        else if (gad.action=="switch"){this.files[this.indfile[0]].like+=2;this.likeviwe=1}
+        else if (gad.action=="new"){this.files[this.indfile[0]].like+=1;this.likeviwe=1}
       }else{
         const gad=this.timeout(()=>this.like(this.files[this.indfile[0]]._id, false, false));
-        if (!gad || gad.action=="cancel"){this.likeviwe=0}
-        else if (gad.action=="switch" || gad.action=="new"){this.likeviwe=-1}
+        if (!gad || gad.action=="cancel"){this.files[this.indfile[0]].like+=1;this.likeviwe=0}
+        else if (gad.action=="switch"){this.files[this.indfile[0]].like-=2;this.likeviwe=-1}
+        else if (gad.action=="new"){this.files[this.indfile[0]].like-=1;this.likeviwe=-1}
       }
       console.log(this.likeviwe)
     },
@@ -197,8 +198,8 @@ export default {
       this.likeviwe=0
       const dt = await this.like(this.files[this.indfile[0]]._id, true, true)
       console.log(dt)
-      if (dt.like){this.files[this.indfile[0]].like-=1;this.likeviwe=1}else
-      if (dt.hate){this.files[this.indfile[0]].hate-=1;this.likeviwe=-1}
+      if (dt.like){this.likeviwe=1}else
+      if (dt.hate){this.likeviwe=-1}
     },
     async analyzeImage(url) {
     try {
