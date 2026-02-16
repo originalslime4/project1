@@ -204,6 +204,7 @@ export default {
       const res = await axios.post("/analyze-image", { url });
       const safe = res.data.safe;
       const labels = res.data.labels;
+      console.log(safe);
       if (safe.adult === "LIKELY" || safe.adult === "VERY_LIKELY") {labels.push("선정적")}
       if (safe.violence === "LIKELY" || safe.violence === "VERY_LIKELY") {labels.push("폭력적")}
       if (safe.spoof === "LIKELY" || safe.spoof === "VERY_LIKELY") {labels.push("패러디적")}
