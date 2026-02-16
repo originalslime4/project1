@@ -449,9 +449,9 @@ async like(id, islike, mod) {
   transform: translateX(0);
 }
 </style>//할일 프로필 연령제한
-git add .
-git commit -m "버그"
-git push origin main 
+// git add .
+// git commit -m "버그"
+// git push origin main 
 // async updateUserInfo(nickname, bio, picture, config) {
 //     try {
 //       const res = await axios.put("/user", { nickname, bio, picture, config });

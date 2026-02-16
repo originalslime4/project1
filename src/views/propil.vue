@@ -234,17 +234,8 @@ export default {
       this.limbtt += 1;
       if (HelloWorld[this.limbtt]) {alert(HelloWorld[this.limbtt]);}
       if (this.limbtt==1){
-      const fileUrl = await this.filetourl(); // 먼저 업로드 수행
-      if (!fileUrl) return; // 업로드 실패 시 중단
-      const sres = await this.analyzeImage(fileUrl);
-      if (!sres) return;
-      const payload = {
-        title: this.title,
-        email: this.userinfo.userEmail,
-        url: fileUrl,
-        tags: sres,
-      };
-      console.log(payload)
+      const fileUrl = await this.filetourl();
+      if (!fileUrl) return;
       this.saveinfo.userPicture=fileUrl
       }
       var last=this.limbtt
@@ -328,6 +319,7 @@ async unfollowUser(targetEmail) {
   async updateUserInfo() {
     try {
       const res = await axios.put("/user", { nickname:this.saveinfo.userName, bio:this.saveinfo.bio, picture:this.saveinfo.picture, config:this.saveinfo.config });
+      sett=false;
       return res.data.success;
     } catch (err) {
       console.error("사용자 정보 수정 실패:", err);
